@@ -1,0 +1,2446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akash Trade International - ERP System</title>
+    <!-- Include qrious library for QR Code Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1e293b;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --bg-color: #f8fafc;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* --- Login Screen Styling --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .login-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .login-card h2 { margin-bottom: 20px; color: var(--primary-color); }
+        .login-card input {
+            width: 100%; padding: 10px; margin-bottom: 15px;
+            border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .cloud-status {
+            font-size: 14px;
+            color: #4ade80;
+            font-weight: bold;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #475569;
+        }
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: none;
+        }
+        .container.active {
+            display: block;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            color: var(--primary-color);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #64748b;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-success { background-color: var(--success-color); }
+        .btn-primary { background-color: var(--info-color); }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-warning { background-color: var(--warning-color); }
+        .btn-secondary { background-color: #64748b; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        table, th, td {
+            border: 1px solid #e2e8f0;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        .button-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .approved-badge {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .pending-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* --- ID Card Profile Box Styling --- */
+        .id-card-preview {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* --- ID Card Print Layout: supplied reference, front + back side-by-side --- */
+        .id-card-print-container{
+            display:none; flex-direction:row; flex-wrap:nowrap; gap:0.28in; justify-content:center; align-items:flex-start;
+            padding:0.18in; background:#fff; width:100%; box-sizing:border-box;
+        }
+        .id-card-side{
+            width:3.65in; height:5.45in; flex:0 0 3.65in; position:relative; overflow:hidden; box-sizing:border-box;
+            border:1.8px solid #1d5f91; border-radius:0.22in;
+            background:linear-gradient(180deg,#eefaff 0%,#dff3ff 58%,#ccecff 100%);
+            box-shadow:0 7px 20px rgba(0,0,0,.16); color:#111; display:flex; flex-direction:column; padding:0 0.16in 0.14in;
+            -webkit-print-color-adjust:exact; print-color-adjust:exact;
+        }
+        .id-card-side::before{content:"";position:absolute;inset:0;opacity:.12;pointer-events:none;
+            background:radial-gradient(circle at 18% 24%,#fff 0 1.5px,transparent 2.5px),radial-gradient(circle at 80% 64%,#fff 0 1.5px,transparent 2.5px);
+            background-size:0.8in 0.8in,1.05in 1.05in;}
+        .id-card-top-wave{position:absolute;top:0;left:0;width:100%;height:1.03in;background:linear-gradient(145deg,#0b5d92,#07507d 55%,#123a66);
+            clip-path:polygon(0 0,100% 0,100% 70%,89% 52%,73% 96%,51% 61%,28% 100%,10% 55%,0 76%);z-index:1;}
+        .id-card-header{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;color:#fff;padding-top:.16in;}
+        .id-card-header h3{margin:0;font-size:15.5px;line-height:1.08;letter-spacing:.45px;font-weight:900;text-transform:uppercase;}
+        .id-card-subtitle{font-size:10.5px;letter-spacing:.2px;margin-top:2px;font-weight:700;}
+        .id-card-address{position:relative;z-index:3;font-size:9.3px;color:#0b3550;text-align:center;margin:.20in auto 0;line-height:1.2;width:calc(100% - .16in);font-weight:900;background:rgba(255,255,255,.82);border:1px solid rgba(11,53,80,.18);border-radius:.06in;padding:.035in .05in;box-sizing:border-box;text-shadow:0 1px 0 rgba(255,255,255,.75);}
+        .id-card-body-front{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:.07in;}
+        .id-card-profile-row{width:100%;display:flex;justify-content:center;align-items:flex-start;position:relative;min-height:1.48in;}
+        .id-card-profile-row > div:nth-child(2){position:absolute;right:.02in;top:-.20in;}
+        .id-photo-box{width:1.22in;height:1.48in;margin-left:auto;margin-right:auto;border:1.8px solid #193f62;border-radius:.10in;box-shadow:0 3px 8px rgba(0,0,0,.18);background:#fff;overflow:hidden;flex:none;}
+        .id-photo-box img{width:100%;height:100%;object-fit:cover;display:block;margin:0 auto;}
+        .id-front-signature{width:1.18in;height:.72in;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:0;margin-top:.01in;overflow:hidden;}
+        .id-front-signature img{width:1.10in;height:.62in;object-fit:contain;display:block;}
+        .id-signature-label{display:none;}
+        .id-emp-name{font-size:16px;line-height:1.05;font-weight:900;color:#111;margin:.055in 0 0;text-transform:uppercase;}
+        .id-emp-desig{font-size:10.5px;color:#222;font-weight:800;margin-top:2px;margin-bottom:.06in;text-transform:uppercase;}
+        .id-card-details-grid{width:100%;text-align:left;font-size:9.3px;background:rgba(255,255,255,.64);padding:.075in .10in;border-radius:.09in;border:1px solid #6c9fbd;margin-bottom:.055in;box-sizing:border-box;}
+        .id-card-details-grid div{margin-bottom:2.5px;display:grid;grid-template-columns:1.05in 1fr;gap:5px;line-height:1.1;}
+        .id-card-details-grid div:last-child{margin-bottom:0;}
+        .id-card-details-grid span{font-weight:900;color:#111;overflow-wrap:anywhere;}
+        .id-card-footer-front{position:relative;z-index:2;border-top:1.5px solid #6c9fbd;padding-top:.055in;display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:.08in;}
+        .id-number-badge{color:#111;font-size:10px;font-weight:900;letter-spacing:.1px;line-height:1.1;}
+        .id-valid-text{font-size:7.5px;color:#333;font-weight:800;margin-top:2px;line-height:1.15;max-width:2.05in;}
+        .id-qr-code{width:.64in;height:.64in;background:#dff3ff;border:1px solid #9bc9df;border-radius:.025in;display:block;}
+        .id-card-back-header{text-align:center;border-bottom:1.5px solid #5d91ae;padding:.10in 0 .07in;margin-bottom:.07in;position:relative;z-index:2;}
+        .id-card-back-header h4{margin:0;color:#111;font-size:14px;line-height:1.1;}
+        .id-card-back-address{font-size:8.5px;font-weight:900;color:#0b3550;line-height:1.15;margin-top:3px;background:rgba(255,255,255,.78);border-radius:.05in;padding:2px 4px;}
+        .id-back-perm{position:relative;z-index:2;text-align:center;font-size:11px;font-weight:900;margin:.045in 0 .07in;}
+        .id-back-details{position:relative;z-index:2;background:rgba(255,255,255,.58);border:1px solid #78a9c2;border-radius:.08in;padding:.07in .10in;margin-bottom:.07in;}
+        .id-back-details div{display:grid;grid-template-columns:1.05in 1fr;gap:4px;font-size:8.6px;line-height:1.15;margin-bottom:3px;}
+        .id-back-details div:last-child{margin-bottom:0;}
+        .id-back-details b{font-weight:900;}
+        .id-back-details span{overflow-wrap:anywhere;}
+        .term-list{font-size:8.4px;color:#222;text-align:left;padding-left:.17in;margin:.01in 0 0;line-height:1.2;position:relative;z-index:2;}
+        .term-list li{margin-bottom:4px;}
+        .id-back-scan{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;margin-top:.02in;padding-top:.04in;border-top:1px dashed #78a9c2;}
+        .id-back-scan-text{font-size:7.5px;font-weight:900;line-height:1.15;max-width:1.75in;}
+        .id-back-qr{width:.58in;height:.58in;background:#dff3ff;border:1px solid #9bc9df;border-radius:.025in;}
+        .id-back-footer{text-align:center;border-top:1px dashed #6c9fbd;padding-top:.045in;position:relative;z-index:2;margin-top:auto;}
+        .sig-image-container{height:.42in;margin-bottom:1px;display:flex;justify-content:center;align-items:center;border:0;background:transparent;}
+        .sig-image-container img{width:1.25in;height:.38in;object-fit:contain;display:block;}
+        .sig-box-line{width:1.45in;border-top:1px solid #333;margin:0 auto 2px;}
+        .sig-label{font-size:8.5px;font-weight:900;color:#222;line-height:1.05;}
+        .id-footer-year{font-size:7px;color:#555;margin-top:2px;font-weight:800;}
+        .profile-status-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:800;}
+        .profile-approved{background:#d1fae5;color:#065f46;}.profile-pending{background:#fef3c7;color:#92400e;}.profile-locked{background:#fee2e2;color:#991b1b;}
+        .profile-edit-count{font-size:10px;font-weight:800;color:#075985;margin-left:4px;}
+        #employeeProfileEditModal{display:none;position:fixed;inset:0;z-index:10002;background:rgba(15,23,42,.78);align-items:center;justify-content:center;padding:15px;box-sizing:border-box;}
+        #employeeProfileEditModal .profile-edit-card{width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:12px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+        .profile-edit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}.profile-edit-grid label{font-size:11px;font-weight:800;color:#475569;display:block;margin-bottom:4px;}
+        .profile-edit-grid input,.profile-edit-grid select{width:100%;padding:8px;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:4px;}
+        @media(max-width:800px){.id-card-print-container{flex-direction:row;overflow-x:auto;justify-content:flex-start}.id-card-side{width:3.65in;height:5.45in;flex:0 0 3.65in;}}
+        /* --- Attendance Report Box --- */
+        .att-report-box {
+            border: 2px solid #333;
+            padding: 20px;
+            margin-top: 30px;
+            background: #fff;
+            display: none;
+            position: relative;
+        }
+        .att-report-header { text-align: center; margin-bottom: 20px; position: relative; }
+        .att-qr-corner { position: absolute; right: 0; top: 0; }
+        .att-report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .att-report-table th, .att-report-table td { border: 1px solid #333; padding: 8px; text-align: center; font-size: 13px; }
+
+        /* --- Trade Bill Report Box --- */
+        .bill-report-box {
+            border: 2px solid #000;
+            padding: 15px;
+            margin-top: 30px;
+            background: #fff;
+            display: none;
+            box-sizing: border-box;
+        }
+        .company-header-center {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .company-title {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .company-address {
+            font-size: 11px;
+            color: #333;
+            margin-top: 2px;
+        }
+        .bill-report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #000;
+            border-bottom: 2px solid #000;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .bill-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0px;
+        }
+        .bill-report-table th, .bill-report-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .bill-report-table{table-layout:fixed;}
+        .bill-report-table th:nth-child(1),.bill-report-table td:nth-child(1){width:4%;}
+        .bill-report-table th:nth-child(2),.bill-report-table td:nth-child(2){width:20%;}
+        .bill-report-table th:nth-child(3),.bill-report-table td:nth-child(3){width:11%;}
+        .bill-report-table th:nth-child(4),.bill-report-table td:nth-child(4){width:11%;}
+        .bill-report-table td{overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
+        .bill-report-table td:nth-child(2){white-space:nowrap;text-align:center!important;}
+        .bill-report-table td:nth-child(3),.bill-report-table td:nth-child(4){white-space:nowrap;text-align:center!important;}
+        .att-report-table th,.att-report-table td{text-align:center!important;vertical-align:middle!important;}
+        .att-report-header,.bill-report-header{text-align:center;}
+
+        .bill-report-table { table-layout: fixed; width:100%; }
+        .bill-report-table th, .bill-report-table td {
+            overflow-wrap:anywhere !important;
+            word-break:break-word !important;
+            white-space:normal !important;
+            vertical-align:middle !important;
+        }
+        .bill-report-table th:nth-child(1), .bill-report-table td:nth-child(1) { width:4.2%; padding-left:3px !important; padding-right:3px !important; }
+        .bill-report-table th:nth-child(2), .bill-report-table td:nth-child(2) { width:8.5%; }
+        .bill-report-table th:nth-child(3), .bill-report-table td:nth-child(3) { width:16%; white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; word-break:normal !important; overflow-wrap:normal !important; }
+        .bill-report-table th:nth-child(4), .bill-report-table td:nth-child(4) { width:12%; }
+        .bill-report-table th:nth-child(5), .bill-report-table td:nth-child(5) { width:11%; }
+        .bill-report-table th:nth-child(6), .bill-report-table td:nth-child(6) { width:11%; }
+
+        .bill-report-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 45px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .sig-line {
+            border-top: 1px solid #000;
+            width: 160px;
+            margin: 0 auto 3px auto;
+        }
+
+        .backup-panel {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #cbd5e1;
+        }
+        .backup-card {
+            background: white;
+            padding: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .att-report-footer{display:flex;justify-content:flex-end;margin-top:16px;padding-top:8px;}
+        .report-signature-block{text-align:center;min-width:1.65in;font-size:9px;font-weight:900;}
+        .report-sig{height:.38in !important;margin-bottom:2px !important;}
+        .report-sig img{width:1.25in !important;height:.38in !important;}
+        .report-signature-row{display:flex !important;justify-content:space-between !important;align-items:flex-end !important;gap:24px !important;margin-top:32px !important;padding-top:10px !important;}
+        .report-signature-row .report-signature-block{flex:1 1 0;min-width:1.7in;text-align:center;font-size:9px;font-weight:900;}
+        .report-signature-row .proprietor-seal-block{flex:1.15 1 0;}
+        .report-signature-row .sig-line{width:160px;max-width:100%;margin:0 auto 3px auto;}
+        @media(max-width:700px){.report-signature-row{gap:8px !important;}.report-signature-row .report-signature-block{min-width:0;font-size:8px;}.report-signature-row .sig-line{width:100px;}}
+
+        /* Separate print setups: ID Card / Attendance / Trade Registered */
+        @media print {
+            body * { visibility:hidden !important; }
+            body.print-id-card #printableIdCardContainer, body.print-id-card #printableIdCardContainer * { visibility:visible !important; }
+            body.print-id-card #printableIdCardContainer{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;height:auto !important;display:flex !important;flex-direction:row !important;flex-wrap:nowrap !important;justify-content:center !important;align-items:flex-start !important;gap:0.28in !important;padding:0.15in !important;margin:0 !important;background:#fff !important;box-sizing:border-box !important;overflow:visible !important;}
+            body.print-id-card .id-card-side{flex:0 0 3.65in !important;width:3.65in !important;height:5.45in !important;border:1.8px solid #000 !important;box-shadow:none !important;break-inside:avoid !important;}
+            body.print-id-card .no-print{display:none !important;}
+
+            body.print-attendance #printableAttReport, body.print-attendance #printableAttReport * { visibility:visible !important; }
+            body.print-attendance #printableAttReport{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;margin:0 !important;background:#fff !important;box-sizing:border-box !important;border:1px solid #333 !important;padding:16px !important;}
+            body.print-attendance .no-print{display:none !important;}
+
+            body.print-bill #printableBillReport, body.print-bill #printableBillReport * { visibility:visible !important; }
+            body.print-bill #printableBillReport, body.print-bill #printableBillReport * { visibility:visible !important; }
+            body.print-bill #printableBillReport{position:absolute !important;left:0 !important;top:0 !important;width:100% !important;min-height:0 !important;margin:0 !important;padding:8px !important;background:#fff !important;box-sizing:border-box !important;border:2px solid #000 !important;display:block !important;overflow:visible !important;}
+            body.print-bill #printableBillReport .bill-report-table{width:100% !important;table-layout:fixed !important;}
+            body.print-bill #printableBillReport .bill-report-table th, body.print-bill #printableBillReport .bill-report-table td{font-size:10px !important;padding:4px !important;white-space:nowrap !important;}
+            body.print-bill #printableBillReport .bill-report-footer{margin-top:22px !important;page-break-inside:avoid !important;}
+            body.print-bill .no-print{display:none !important;}
+            body.print-bill #billHeaderQRCode{display:block !important;}
+            body.print-bill .report-signature-row{page-break-inside:avoid !important;}
+            body.print-bill{background:#fff !important;}
+        }
+        @page { size: A4 landscape; margin: 0.25in; }
+
+        /* --- Search / Direct Edit / Attachment UI --- */
+        .search-panel {
+            display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+            margin: 10px 0 15px; padding:12px; background:#f8fafc;
+            border:1px solid #cbd5e1; border-radius:6px;
+        }
+        .search-panel input {
+            flex:1; min-width:220px; padding:9px 10px; border:1px solid #94a3b8;
+            border-radius:5px; box-sizing:border-box;
+        }
+        .edit-count-badge {
+            display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px;
+            font-weight:bold; background:#e0f2fe; color:#075985; margin-left:3px;
+        }
+        .lock-badge {
+            display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px;
+            font-weight:bold; background:#fee2e2; color:#991b1b;
+        }
+        .file-badge {
+            display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px;
+            font-weight:bold; background:#dcfce7; color:#166534;
+        }
+        #directEditModal {
+            display:none; position:fixed; inset:0; z-index:10001;
+            background:rgba(15,23,42,.75); align-items:center; justify-content:center;
+            padding:15px; box-sizing:border-box;
+        }
+        #directEditModal .edit-card {
+            width:min(720px,100%); max-height:90vh; overflow:auto; background:#fff;
+            border-radius:10px; padding:20px; box-shadow:0 20px 50px rgba(0,0,0,.35);
+        }
+        .edit-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px;
+        }
+        .edit-grid label { font-size:11px; font-weight:bold; color:#475569; display:block; margin-bottom:4px; }
+        .edit-grid input, .edit-grid select {
+            width:100%; padding:8px; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:4px;
+        }
+        .future-file-panel{margin-top:20px}
+        .future-file-table td,.future-file-table th{vertical-align:middle}
+        .admin-only{display:none}
+        @media(max-width:600px){
+            .search-panel input{min-width:100%}
+            table{font-size:11px}
+            th,td{padding:5px}
+        }
+        .saved-hint { display:block; margin-top:4px; font-size:10px; color:#64748b; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Modal -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h2>Akash ERP Login</h2>
+            <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:10px;margin-bottom:12px;text-align:center;font-size:12px;">
+                <b>🔐 Admin Login</b>
+            </div>
+            <input type="text" id="loginUser" placeholder="Enter User ID">
+            <input type="password" id="loginPass" placeholder="Enter Password">
+            <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">Login System</button>
+            <div style="font-size:11px;color:#64748b;margin-top:10px;">User accounts are created and controlled by Admin.</div>
+        </div>
+    </div>
+
+    <!-- Top Status Bar -->
+    <div class="header-bar no-print">
+        <div>
+            <h1 style="margin:0; font-size: 1.4rem;">AKASH TRADE INTERNATIONAL</h1>
+            <span style="font-size: 12px; opacity: 0.8;">Smart Management ERP System | User: <span id="currentLoggedInUser" style="color:#fde047; font-weight:bold; cursor:pointer;" onclick="secretSettingsTrigger()" title="Click 3 times for hidden settings"></span></span>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="cloud-status">● Cloud Connected</div>
+            <button class="btn btn-danger" onclick="logoutSystem()" style="padding: 4px 10px; font-size: 11px;">Logout</button>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs no-print">
+        <button class="tab-btn active" onclick="switchTab('attendanceTab', this)">Attendance Report & ID Card</button>
+        <button class="tab-btn" onclick="switchTab('billTab', this)">Trade Registered Bill & Backup</button>
+        <button class="tab-btn" onclick="switchTab('attSummaryTab', this)">Attendance Summary</button>
+        <button class="tab-btn" onclick="switchTab('billSummaryTab', this)">Trade Bill Summary</button>
+        <button class="tab-btn" onclick="switchTab('futureUploadTab', this)">📁 Future Upload Files</button>
+        <button id="syncTabBtn" class="tab-btn admin-only" onclick="switchTab('dataFolderTab', this)" style="background: #0f172a; color: #fff;">💾 Code & Data Sync Center</button>
+    </div>
+
+    <!-- Hidden Settings Tab Container -->
+    <div id="settingsTab" class="container admin-only">
+        <h2>⚙️ Hidden User & Security Management</h2>
+        <p style="font-size: 13px; color: #555;">এটি একটি সংরক্ষিত সিকিউরিটি জোন। অ্যাডমিন পাসওয়ার্ড ছাড়া ইউজার পরিবর্তন বা নতুন ইউজার তৈরি করা যাবে না।</p>
+        <div class="form-grid" style="max-width: 400px; margin-top: 20px;">
+            <div class="form-group"><label>Admin Verification Password</label><input type="password" id="adminVerifyPass" placeholder="Enter Admin Password"></div>
+            <div class="form-group"><label>New User ID</label><input type="text" id="newUserIdInput" placeholder="New User ID"></div>
+            <div class="form-group"><label>New Password</label><input type="password" id="newUserPassInput" placeholder="New Password"></div>
+            <div class="form-group"><label>Access Role</label>
+                <select id="newUserRoleInput">
+                    <option value="user">User</option>
+                    <option value="programmer">Programmer</option>
+                    <option value="developer">Developer</option>
+                    <option value="main-admin">Main Admin</option>
+                </select>
+            </div>
+            <div><button class="btn btn-success" onclick="saveNewUserCredentialsSecure()">Authorize & Save User</button></div>
+        </div>
+        <div style="margin-top: 30px;">
+            <h3>Authorized Users List:</h3>
+            <table style="max-width: 700px;">
+                <thead><tr><th>User ID</th><th>Role</th><th class="no-print">Action</th></tr></thead>
+                <tbody id="userListTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1. ATTENDANCE & SCAN ID CARD MANAGEMENT SECTION -->
+    <div id="attendanceTab" class="container active">
+        <h2>Attendance / Punch Management & Scan ID Cards (2026 - 2050)</h2>
+        
+        <!-- Scanner & Hardware Setup Panel -->
+        <div class="backup-card no-print" style="border-color: #3b82f6; background: #f0fdf4;">
+            <h3 style="margin-top:0; color:#166534; font-size:15px;">🔌 Scanner & Hardware Setup (Auto/Manual Attendance)</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Scanner Type Selection</label>
+                    <select id="hardwareScannerType">
+                        <option value="usb">USB Barcode / QR Scanner (Plug & Play)</option>
+                        <option value="camera">Network / IP / Webcam Scanner</option>
+                        <option value="rfid">RFID / Serial Port Reader (COM Port)</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>COM Port / Baud Rate (If Serial/RFID)</label><input type="text" id="hardwareComPort" placeholder="e.g. COM1, 9600"></div>
+                <div class="form-group"><label>Device Live Status</label><div style="padding:8px;font-weight:bold;color:#059669;" id="deviceStatusIndicator">🟢 Connected (Listening Mode Active)</div></div>
+            </div>
+            <button class="btn btn-primary" onclick="testHardwareConnection()">Test Connection</button>
+        </div>
+
+        <!-- ID Card & Employee Scan Profile Sub-Section -->
+        <div class="id-card-preview no-print">
+            <h3 style="margin-top:0;color:#1e293b;font-size:15px;">📇 ID Card & Employee Scan Profile Creation</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Full Name</label><input type="text" id="empProfileName" placeholder="Employee Full Name"></div>
+                <div class="form-group"><label>Designation (পদবি)</label><input type="text" id="empProfileDesignation" placeholder="e.g. Manager - Operations"></div>
+                <div class="form-group"><label>Mobile No. (মোবাইল নম্বর)</label><input type="text" id="empProfileMobile" placeholder="017xxxxxxxx"></div>
+                <div class="form-group"><label>Licences Number (লাইসেন্স নম্বর)</label><input type="text" id="empProfileLicence" placeholder="License Number"></div>
+                <div class="form-group"><label>NID Card No. (এনআইডি নম্বর)</label><input type="text" id="empProfileNid" placeholder="National ID Number"></div>
+                <div class="form-group"><label>Blood Group (রক্তের গ্রুপ)</label>
+                    <select id="empProfileBloodGroup">
+                        <option value="">Select Blood Group</option>
+                        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Employee Photo (ছবি)</label><input type="file" id="empProfilePhoto" accept=".jpg,.jpeg,.png"></div>
+                <div class="form-group"><label>Scan ID / Barcode / QR Code</label><input type="text" id="empProfileScanId" readonly placeholder="Auto Generated" style="background:#e2e8f0;font-weight:bold;"></div>
+                <div class="form-group"><label>Employment Status</label><select id="empProfileEmploymentStatus"><option value="active">Active — Scan Enabled</option><option value="ended">Ended — Scan Disabled</option><option value="banned">Banned — Scan Disabled</option></select></div>
+                <div class="form-group"><label>Employment End Date (optional)</label><input type="date" id="empProfileEndDate"></div>
+            </div>
+            <button class="btn btn-success" onclick="saveEmployeeProfile()">Create & Save ID Profile</button>
+        </div>
+
+        <!-- Saved Employee Profiles & Biometric Digital ID Card -->
+        <div class="backup-card no-print" style="margin-bottom:20px;">
+            <h3 style="margin-top:0;color:#1e293b;font-size:15px;">📋 Saved Employees & Biometric Digital ID Card Print</h3>
+            <table>
+                <thead>
+                    <tr><th>Permanent No</th><th>Name</th><th>Designation</th><th>Blood</th><th>Mobile</th><th>Approval / Edit</th><th>Action</th></tr>
+                </thead>
+                <tbody id="empProfileTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Printable Biometric ID Card — exact front/back layout, both sides side-by-side -->
+        <div id="printableIdCardContainer" class="id-card-print-container">
+            <!-- FRONT -->
+            <div class="id-card-side">
+                <div class="id-card-top-wave"></div>
+                <div class="id-card-header">
+                    <h3>AKASH TRADE INTERNATIONAL</h3>
+                    <div class="id-card-subtitle">SMART MANAGEMENT ERP SYSTEM</div>
+                </div>
+                <div class="id-card-address">S.B. TRADE CENTER, 94 SK. MUJIB ROAD (5TH FLOOR),<br>AGRABAD, CHATTOGRAM.</div>
+                <div class="id-card-body-front">
+                    <div style="font-size:12px;font-weight:900;margin-bottom:3px;">EMPLOYEES IDENTITY</div>
+                    <div class="id-card-profile-row">
+                        <div class="id-photo-box"><img id="printCardPhoto" src="" alt="Employee Photo"></div>
+                    </div>
+                    <div class="id-emp-name" id="printCardName">EMPLOYEE NAME</div>
+                    <div class="id-emp-desig" id="printCardDesig">DESIGNATION</div>
+                    <div class="id-card-details-grid">
+                        <div><b>MOBILE:</b><span id="printCardMobile">-</span></div>
+                        <div><b>LICENCE NO:</b><span id="printCardLicence">-</span></div>
+                        <div><b>NID NO:</b><span id="printCardNid">-</span></div>
+                        <div><b>BLOOD GROUP:</b><span id="printCardBlood">-</span></div>
+                    </div>
+                </div>
+                <div class="id-card-footer-front">
+                    <div><div class="id-number-badge">PERMANENT NO: <span id="printCardIdFront">--</span></div><div class="id-valid-text">ATTENDANCE PUNCH CARD • KEEP THIS CARD VISIBLE DURING OFFICE HOURS</div></div>
+                    <canvas id="printCardQrCanvas" class="id-qr-code"></canvas>
+                </div>
+            </div>
+
+            <!-- BACK -->
+            <div class="id-card-side">
+                <div class="id-card-top-wave"></div>
+                <div class="id-card-header"><h3>AKASH TRADE INTERNATIONAL</h3><div class="id-card-subtitle">EMPLOYEE ID • ATTENDANCE CARD</div></div>
+                <div class="id-card-address">S.B. TRADE CENTER, 94 SK. MUJIB ROAD (5TH FLOOR),<br>AGRABAD, CHATTOGRAM.</div>
+                <div class="id-card-back-header"><h4>EMPLOYEE DETAILS</h4></div>
+                <div class="id-back-perm">PERMANENT NO: <span id="printCardIdBack">--</span></div>
+                <div class="id-back-details">
+                    <div><b>FULL NAME</b><span id="printBackName">-</span></div>
+                    <div><b>DESIGNATION</b><span id="printBackDesig">-</span></div>
+                    <div><b>MOBILE</b><span id="printBackMobile">-</span></div>
+                    <div><b>LICENCE NO.</b><span id="printBackLicence">-</span></div>
+                    <div><b>NID NO.</b><span id="printBackNid">-</span></div>
+                    <div><b>BLOOD GROUP</b><span id="printBackBlood">-</span></div>
+                    <div><b>STATUS</b><span id="printBackStatus">PENDING</span></div>
+                </div>
+                <div class="id-back-scan"><div class="id-back-scan-text">SCAN THIS QR / PERMANENT NO. TO PUNCH ATTENDANCE<br><span id="printBackPunchId">--</span></div><canvas id="printCardQrBackCanvas" class="id-back-qr"></canvas></div>
+                <ul class="term-list">
+                    <li>This card is the official property of Akash Trade International.</li>
+                    <li>Attendance punch using this card is mandatory for all employees.</li>
+                    <li>If found, please return this card to the company office address or contact management.</li>
+                    <li>Unauthorized use, duplication or tampering is strictly prohibited.</li>
+                    <li>Cardholder must display this card visibly during office hours.</li>
+                    <li>This card is non-transferable and must be returned upon leaving the company.</li>
+                </ul>
+                <div class="id-back-footer">
+                    <div class="sig-image-container"><img src="data:image/png;base64,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" alt="Authorized Signature & Seal"></div>
+                    <div class="sig-box-line"></div>
+                    <div class="sig-label">AUTHORIZED SIGNATURE &amp; SEAL</div>
+                    <div class="id-footer-year">AKASH TRADE INTERNATIONAL ERP 2026</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Barcode / Punch Quick Input -->
+        <div class="search-panel no-print" style="background:#eff6ff; border-color:#93c5fd;">
+            <strong>⚡ Auto Scan / Manual Punch Input:</strong>
+            <input type="search" id="quickScanInput" placeholder="Scan ID Card or Type Employee ID to Punch instantly..." onkeydown="handleQuickScanKeydown(event)">
+            <button class="btn btn-primary" onclick="triggerQuickScanPunch()">Punch Now</button>
+        </div>
+
+        <div class="form-grid no-print" id="attFormGrid">
+            <div class="form-group"><label>Month & Year</label><select id="attMonthYear"></select></div>
+            <div class="form-group"><label>Employee ID</label><input type="text" id="attEmpId" list="employeeIdOptions" autocomplete="off" placeholder="Type or select saved Employee ID"><datalist id="employeeIdOptions"></datalist><small class="saved-hint">💡 একবার Save করলে পরের বার Auto Suggest হবে</small></div>
+            <div class="form-group"><label>Date</label><input type="date" id="attDate"></div>
+            <div class="form-group"><label>Punch ID</label><input type="text" id="attPunchId" placeholder="0"></div>
+            <div class="form-group"><label>IN Time (AM / PM)</label><input type="time" id="attIn"></div>
+            <div class="form-group"><label>Break Time (AM / PM)</label><input type="time" id="attBreak"></div>
+            <div class="form-group"><label>OUT Time (AM / PM)</label><input type="time" id="attOut" oninput="updateAttendanceOTPreview()"></div>
+            <div class="form-group"><label>Overtime (After 08:00 PM)</label><input type="text" id="attOT" placeholder="Auto" readonly style="background:#f1f5f9;"></div>
+            <div class="form-group"><label>Status</label><select id="attStatus"><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></div>
+            <div class="form-group"><label>Note</label><input type="text" id="attNote" placeholder="Optional"></div>
+        </div>
+        <div class="search-panel no-print">
+            <strong>🔎 Search Reg No:</strong>
+            <input type="search" id="attRegSearch" placeholder="যেমন ATT-REG-1001" oninput="loadAttendance()">
+            <button class="btn btn-primary" onclick="loadAttendance()">Search</button>
+            <button class="btn btn-secondary" onclick="clearRegSearch('att')">Clear</button>
+        </div>
+        <div class="button-group no-print">
+            <button class="btn btn-success" onclick="saveAttendance()">Save Punch</button>
+            <button class="btn btn-primary" onclick="addAttendance()">Add Record</button>
+            <button class="btn btn-warning" onclick="addNewAttendanceData()">Add New Data</button>
+            <button class="btn btn-secondary" onclick="printAttReport()">Print Report</button>
+            <button class="btn btn-danger" onclick="downloadAttPDF()">Download PDF</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Reg No</th><th>Month/Year</th><th>Date</th><th>Employee ID</th><th>Punch ID</th><th>IN</th><th>Break</th><th>OUT</th><th>OT</th><th>Status</th><th>Approval</th><th>Attachment</th><th class="no-print">Action</th>
+                </tr>
+            </thead>
+            <tbody id="attTableBody"></tbody>
+        </table>
+        <div id="printableAttReport" class="att-report-box">
+            <div class="att-report-header">
+                <div class="att-qr-corner"><canvas id="attQRCode" width="60" height="60"></canvas></div>
+                <h2 style="margin:0; font-size:16px;">AKASH TRADE INTERNATIONAL</h2>
+                <div style="font-size:11px; color:#444; margin-top:2px;">S.B Trade Center, 94 Sk Mujib Road (5th Floor), Agrabad, Chattogram</div>
+                <div style="font-weight:bold; margin-top:5px;">Attendance Report</div>
+                <div style="font-size:11px; color:#666;">Generated: <span id="attGenTime"></span></div>
+                <hr style="border:1px solid #333; margin-top:10px;">
+            </div>
+            <table class="att-report-table">
+                <thead><tr><th>Date</th><th>Employee ID</th><th>Punch ID</th><th>IN</th><th>Break</th><th>OUT</th><th>OT Hours</th><th>Status</th><th>Note</th></tr></thead>
+                <tbody id="attReportRows"></tbody>
+            </table>
+            <div class="att-report-footer report-signature-row">
+                <div class="report-signature-block">
+                    <div class="sig-line"></div>
+                    <div>Authorized</div>
+                </div>
+                <div class="report-signature-block">
+                    <div class="sig-line"></div>
+                    <div>Account / Manager Verified</div>
+                </div>
+                <div class="report-signature-block proprietor-seal-block">
+                    <div style="font-size:10px; margin-bottom:2px;">Akash trade international</div>
+                    <div class="sig-image-container report-sig" style="height:25px; margin-bottom:0;"><img src="data:image/png;base64,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" style="max-height:22px;" alt="Proprietor Signature"></div>
+                    <div class="sig-line"></div>
+                    <div>Proprietor</div>
+                </div>
+            </div
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. TRADE REGISTERED BILL SECTION -->
+    <div id="billTab" class="container">
+        <h2>Trade / Registered Bill Management & Backup (2026 - 2050)</h2>
+        <div class="form-grid no-print" id="billFormGrid">
+            <div class="form-group"><label>Month & Year (Backup Folder)</label><select id="billMonthYear"></select></div>
+            <div class="form-group"><label>Date</label><input type="date" id="billDate"></div>
+            <div class="form-group"><label>Shipper Name</label><input type="text" id="billShipper" list="shipperNameOptions" autocomplete="off" placeholder="Type or select saved Shipper Name"><datalist id="shipperNameOptions"></datalist><small class="saved-hint">💡 একবার Save করলে পরের বার Auto Suggest হবে</small></div>
+            <div class="form-group"><label>Bill To</label><input type="text" id="billTo" placeholder="973"></div>
+            <div class="form-group"><label>Bill From</label><input type="text" id="billFrom" placeholder="1124"></div>
+            <div class="form-group"><label>Total Bill</label><input type="text" id="totalBill" placeholder="152"></div>
+            <div class="form-group"><label>Tax / VAT</label><input type="number" id="billVat" placeholder="128416.97"></div>
+            <div class="form-group"><label>Total Taka</label><input type="number" id="billTotal" placeholder="736241.44"></div>
+            <div class="form-group"><label>Despatch</label><input type="text" id="billDespatch" placeholder="0"></div>
+            <div class="form-group"><label>Remarks</label><input type="text" id="billRemarks" placeholder="0"></div>
+        </div>
+        <div class="search-panel no-print">
+            <strong>🔎 Search Reg No:</strong>
+            <input type="search" id="billRegSearch" placeholder="যেমন BILL-2001" oninput="loadBills()">
+            <button class="btn btn-primary" onclick="loadBills()">Search</button>
+            <button class="btn btn-secondary" onclick="clearRegSearch('bill')">Clear</button>
+        </div>
+        <div class="button-group no-print">
+            <button class="btn btn-success" onclick="saveBill()">Save Bill</button>
+            <button class="btn btn-primary" onclick="addBill()">Add Record</button>
+            <button class="btn btn-warning" onclick="addNewBillData()">Add New Data</button>
+            <button class="btn btn-secondary" onclick="printBillReport()">Print Report</button>
+            <button class="btn btn-danger" onclick="downloadBillPDF()">Download PDF</button>
+        </div>
+        <div class="backup-panel no-print">
+            <label style="font-weight:bold; font-size:13px;">📁 Select Month Folder to View Backup Data:</label>
+            <select id="backupFolderSelect" onchange="loadBills()" style="padding:6px; width:250px; margin-top:5px; border-radius:4px; border:1px solid #cbd5e1;"></select>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Reg No</th><th>Month Folder</th><th>Date</th><th>Shipper</th><th>Bill To</th><th>Bill From</th><th>Total Bill</th><th>Tax/VAT</th><th>Total Taka</th><th>Despatch</th><th>Remarks</th><th>Approval</th><th class="no-print">Action</th></tr>
+            </thead>
+            <tbody id="billTableBody"></tbody>
+        </table>
+        <div id="printableBillReport" class="bill-report-box">
+            <div class="company-header-center">
+                <div class="company-title">AKASH TRADE INTERNATIONAL</div>
+                <div class="company-address">S.B Trade Center, 94 Sk Mujib Road (5th Floor), Agrabad, Chattogram</div>
+            </div>
+            <div class="bill-report-header">
+                <div>DATE: <span id="billReportDate"></span></div>
+                <div>Month of <span id="billReportMonthTitle"></span></div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <canvas id="billHeaderQRCode" width="45" height="45" style="vertical-align: middle;"></canvas>
+                    <span style="font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">COMFIRMED</span>
+                </div>
+            </div>
+            <table class="bill-report-table">
+                <thead><tr><th>S/L</th><th>Shipper</th><th>Bill To</th><th>Bill From</th><th>Total Bill</th><th>Tax/Vat</th><th>Total Taka</th><th>Despatch</th><th>Remark</th></tr></thead>
+                <tbody id="billReportRows"></tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #fff;">
+                        <td colspan="4" style="text-align: right;">TOTAL</td>
+                        <td id="sumTotalBill">0</td><td id="sumVat">0</td><td id="sumTaka">0</td><td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="bill-report-footer report-signature-row">
+                <div class="report-signature-block">
+                    <div class="sig-line"></div>
+                    <div>Authorized</div>
+                </div>
+                <div class="report-signature-block">
+                    <div class="sig-line"></div>
+                    <div>Account / Manager Verified</div>
+                </div>
+                <div class="report-signature-block proprietor-seal-block">
+                    <div style="font-size:10px; margin-bottom:2px;">Akash trade international</div>
+                    <div class="sig-image-container report-sig" style="height:25px; margin-bottom:0;"><img src="data:image/png;base64,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" style="max-height:22px;" alt="Proprietor Signature"></div>
+                    <div class="sig-line"></div>
+                    <div>Proprietor</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ATTENDANCE SUMMARY SECTION -->
+    <div id="attSummaryTab" class="container">
+        <h2>📊 Attendance Summary (A to Z & Monthly Folders)</h2>
+        <div style="margin-bottom: 20px;" class="no-print"><button class="btn btn-primary" onclick="renderAttendanceSummaries()">Refresh Attendance Summary</button> <button class="btn btn-secondary" onclick="printAttendanceSummary()">🖨 Print Summary</button></div>
+        <h3>Attendance A to Z Summary</h3>
+        <table>
+            <thead><tr><th>Total Records</th><th>Present Count</th><th>Absent Count</th><th>Late Count</th></tr></thead>
+            <tbody><tr><td id="attAzTotalCount">0</td><td id="attAzPresentCount">0</td><td id="attAzAbsentCount">0</td><td id="attAzLateCount">0</td></tr></tbody>
+        </table>
+        <h3 style="margin-top: 30px;">Attendance January - December Monthly Folders</h3>
+        <table>
+            <thead><tr><th>Month Folder</th><th>Record Count</th><th>Present</th><th>Absent</th><th>Late</th></tr></thead>
+            <tbody id="attMonthlySummaryBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 4. TRADE BILL SUMMARY SECTION -->
+    <div id="billSummaryTab" class="container">
+        <h2>📊 Trade Bill Summary (A to Z & Monthly Folders)</h2>
+        <div style="margin-bottom: 20px;" class="no-print"><button class="btn btn-primary" onclick="renderBillSummaries()">Refresh Trade Bill Summary</button> <button class="btn btn-secondary" onclick="printBillSummary()">🖨 Print Summary</button></div>
+        <h3>Trade Bill A to Z Summary (Yearly Total Across All Months)</h3>
+        <table>
+            <thead><tr><th>Total Records</th><th>Total Bill Sum</th><th>Total Tax / VAT Sum</th><th>Grand Total Taka</th></tr></thead>
+            <tbody><tr><td id="azTotalCount">0</td><td id="azTotalBillSum">0.00</td><td id="azTotalVatSum">0.00</td><td id="azGrandTakaSum">0.00</td></tr></tbody>
+        </table>
+        <h3 style="margin-top: 30px;">Trade Bill January - December Monthly Summary Folders</h3>
+        <table>
+            <thead><tr><th>Month Folder</th><th>Record Count</th><th>Total Bill</th><th>Tax / VAT</th><th>Total Taka</th></tr></thead>
+            <tbody id="billMonthlySummaryBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 5. FUTURE UPLOAD FILE CENTER -->
+    <div id="futureUploadTab" class="container">
+        <h2>📁 Future Upload File Center</h2>
+        <p style="font-size:13px;color:#555;">প্রয়োজনীয় PDF, ছবি, Letter, Document বা অন্য ফাইল এখানে আলাদাভাবে সংরক্ষণ করতে পারবেন। পরে Download বা Print করতে পারবেন।</p>
+        <div class="backup-card future-file-panel no-print">
+            <input type="file" id="futureFileInput" style="margin-bottom:10px;">
+            <input type="text" id="futureFileNote" placeholder="File note / description (optional)" style="width:100%;padding:8px;box-sizing:border-box;margin-bottom:10px;border:1px solid #cbd5e1;border-radius:4px;">
+            <button class="btn btn-success" onclick="uploadFutureFile()">⬆️ Upload & Save File</button>
+        </div>
+        <table class="future-file-table">
+            <thead><tr><th>File Name</th><th>Note</th><th>Uploaded</th><th>Size</th><th class="no-print">Action</th></tr></thead>
+            <tbody id="futureFileTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 6. CODE & DATA SYNC CENTER (Admin Only) -->
+    <div id="dataFolderTab" class="container">
+        <h2>🔄 Code Configuration & Multi-Device Data Sync Center — ADMIN ONLY</h2>
+        <p style="font-size: 13px; color: #555;">ভবিষ্যতে নতুন কোডিং আপডেট (Copy-Paste) করতে এবং ব্যাকআপ বা রিস্টোর করতে হলে সিকিউরিটি পাসওয়ার্ড দিতে হবে।</p>
+        
+        <div id="restoreAuthBox" class="backup-card" style="border-color: var(--warning-color); background: #fefce8; max-width: 450px; margin-top: 20px;">
+            <h3 style="margin-top:0; color:var(--warning-color);">🔒 Enter Security Password</h3>
+            <p style="font-size: 12px; color: #666;">Admin Password দিয়ে Code/Data Sync Center unlock করুন।</p>
+            <input type="password" id="syncSecurityPass" placeholder="Enter Admin Password" style="margin-bottom: 10px; width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <button class="btn btn-warning" onclick="unlockSyncCenter()">Unlock Sync Center</button>
+        </div>
+
+        <div class="backup-card" style="border-color:#3b82f6;background:#eff6ff;margin-top:20px;">
+            <h3 style="margin-top:0;color:#1d4ed8;">☁️ Firebase Cloud Database Sync</h3>
+            <p style="font-size:12px;color:#475569;">Firebase Cloud Firestore-এর সাথে Attendance, Trade Bill, User এবং ERP data sync হবে। একই Firebase project-এ যুক্ত device/browser-এ একই data দেখা যাবে।</p>
+            <div class="form-grid">
+                <div class="form-group"><label>apiKey</label><input id="fbApiKey" placeholder="Firebase apiKey"></div>
+                <div class="form-group"><label>authDomain</label><input id="fbAuthDomain" placeholder="your-project.firebaseapp.com"></div>
+                <div class="form-group"><label>projectId</label><input id="fbProjectId" placeholder="your-project-id"></div>
+                <div class="form-group"><label>storageBucket</label><input id="fbStorageBucket" placeholder="your-project.appspot.com"></div>
+                <div class="form-group"><label>messagingSenderId</label><input id="fbMessagingSenderId" placeholder="Messaging Sender ID"></div>
+                <div class="form-group"><label>appId</label><input id="fbAppId" placeholder="Firebase App ID"></div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="connectFirebase()">☁️ Connect Firebase</button>
+                <button class="btn btn-success" onclick="firebaseUploadAll()">⬆️ Upload Local Data</button>
+                <button class="btn btn-warning" onclick="firebaseDownloadAll()">⬇️ Download Cloud Data</button>
+                <button class="btn btn-secondary" onclick="firebaseStartRealtimeSync()">🔄 Realtime Sync</button>
+            </div>
+            <div id="firebaseStatus" style="margin-top:10px;font-weight:bold;font-size:13px;color:#64748b;">Firebase: Not Connected</div>
+        </div>
+
+        <div id="syncContentPanel" style="display: none;">
+            <div class="backup-card" style="border-color:#8b5cf6;background:#f5f3ff;margin-top:20px;">
+                <h3 style="margin-top:0;color:#6d28d9;">👤 Admin User Control</h3>
+                <p style="font-size:12px;color:#555;">শুধু Main Admin এখান থেকে User ID/Password এবং Role তৈরি বা পরিবর্তন করতে পারবেন।</p>
+                <button class="btn btn-primary" onclick="openAdminUserControl()">Open User Control</button>
+            </div>
+            <div class="form-grid" style="margin-top: 20px;">
+                <div class="backup-card">
+                    <h3 style="margin-top:0; color:var(--success-color);">📥 Export System Code & Data</h3>
+                    <p style="font-size: 12px; color: #666;">সকল ডেটা ও বর্তমান সিস্টেম কনফিগারেশন ফাইল আকারে ডাউনলোড করুন।</p>
+                    <button class="btn btn-success" onclick="downloadSystemBackup()">Download Master Package (.json)</button>
+                </div>
+
+                <div class="backup-card">
+                    <h3 style="margin-top:0; color:var(--info-color);">📤 Upload & Apply Code/Data Update</h3>
+                    <p style="font-size: 12px; color: #666;">নতুন কোডিং আপডেট বা ব্যাকআপ ফাইল আপলোড করুন।</p>
+                    <input type="file" id="restoreFile" accept=".json,.html" style="margin-bottom: 10px; font-size: 12px;"><br>
+                    <button class="btn btn-primary" onclick="restoreSystemBackup()">Upload & Auto-Update Now</button>
+                </div>
+            </div>
+
+            <div class="backup-card" style="margin-top: 20px;">
+                <h3 style="margin-top:0; color:var(--primary-color);">📋 Direct Code Paste Box (Future Code Update)</h3>
+                <p style="font-size: 12px; color: #666;">এখানে নতুন সম্পূর্ণ HTML কোড পেস্ট করে সরাসরি আপডেট করতে পারবেন।</p>
+                <textarea id="directCodePasteBox" rows="6" placeholder="Paste full updated HTML code here..." style="width:100%; font-family:monospace; font-size:12px; padding:10px; box-sizing:border-box;"></textarea>
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="applyDirectCodePaste()">Apply & Deploy New Code</button>
+            </div>
+
+            <div class="backup-card" style="border-color: #ef4444; margin-top: 20px;">
+                <h3 style="margin-top:0; color:var(--danger-color);">⚠️ Danger Zone (Reset All)</h3>
+                <p style="font-size: 12px; color: #666;">সতর্কতা: এটি করলে সমস্ত লোকাল ডেটা রিসেট হবে।</p>
+                <button class="btn btn-danger" onclick="clearAllSystemData()">Clear & Reset System</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Direct Edit Modal -->
+    <div id="directEditModal" class="no-print">
+        <div class="edit-card">
+            <h2 style="margin-bottom:5px;">✏️ Direct Edit</h2>
+            <p id="editModalInfo" style="font-size:12px;color:#64748b;margin-top:0;"></p>
+            <div id="editFields" class="edit-grid"></div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="saveDirectEdit()">Save Edit</button>
+                <button class="btn btn-secondary" onclick="closeDirectEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
+
+        let fbDb = null, fbStorage = null, fbUnsubs = [];
+        const FB_KEY = "akashFirebaseConfig";
+        const BUILT_IN_FIREBASE_CONFIG = {
+          apiKey: "AIzaSyDm44YMXj6rEbO6kc2RRpH3ZXUpeAi8d28",
+          authDomain: "redoybd2026.firebaseapp.com",
+          projectId: "redoybd2026",
+          storageBucket: "redoybd2026.firebasestorage.app",
+          messagingSenderId: "207319417332",
+          appId: "1:207319417332:web:3ba8616aff53b310c179a1",
+          measurementId: "G-G3WZQ3VNP5"
+        };
+
+        function cfgForm(){
+            return {
+                apiKey: fbApiKey.value.trim(), authDomain: fbAuthDomain.value.trim(),
+                projectId: fbProjectId.value.trim(), storageBucket: fbStorageBucket.value.trim(),
+                messagingSenderId: fbMessagingSenderId.value.trim(), appId: fbAppId.value.trim()
+            };
+        }
+        function fbStatus(t, ok=false){
+            const e=document.getElementById("firebaseStatus");
+            if(e){e.textContent=t;e.style.color=ok?"#059669":"#dc2626";}
+        }
+        function fillCfg(c){
+            if(!c)return;
+            [["fbApiKey","apiKey"],["fbAuthDomain","authDomain"],["fbProjectId","projectId"],
+             ["fbStorageBucket","storageBucket"],["fbMessagingSenderId","messagingSenderId"],["fbAppId","appId"]]
+            .forEach(([a,b])=>{const e=document.getElementById(a);if(e)e.value=c[b]||"";});
+        }
+        async function initFB(c){
+            if(!c.apiKey||!c.projectId||!c.appId){fbStatus("Firebase: Config incomplete");return false;}
+            try{
+                const apps=getApps();
+                const app=apps.length?apps[0]:initializeApp(c);
+                fbDb=getFirestore(app); fbStorage=getStorage(app);
+                localStorage.setItem(FB_KEY,JSON.stringify(c));
+                fbStatus("Firebase: Connected ✓",true);
+                return true;
+            }catch(e){console.error(e);fbStatus("Firebase connection failed: "+e.message);return false;}
+        }
+        async function connectFirebase(){
+            if(!isTechStaff()) { alert('Only Main Admin / Developer / Programmer can control Firebase.'); return; }
+            const ok=await initFB(cfgForm());
+            if(ok){await firebaseDownloadAll();await firebaseUploadAll();firebaseStartRealtimeSync();alert("Firebase Connected এবং data sync চালু হয়েছে।");}
+        }
+        async function uploadCol(name,arr,key){
+            if(!fbDb)throw Error("Firebase is not connected");
+            for(const x of (arr||[])){
+                const id=String(x[key]).replaceAll("/","_");
+                await setDoc(doc(fbDb,name,id),{...x,_syncUpdatedAt:new Date().toISOString()});
+            }
+        }
+        async function firebaseUploadAll(){
+            if(!isTechStaff()) { alert('Only Main Admin / Developer / Programmer can upload cloud data.'); return; }
+            if(!fbDb){alert("আগে Connect Firebase করুন।");return;}
+            try{
+                await uploadCol("attendance",JSON.parse(localStorage.getItem("attList"))||[],"regNo");
+                await uploadCol("tradeBills",JSON.parse(localStorage.getItem("billList"))||[],"regNo");
+                await uploadCol("users",JSON.parse(localStorage.getItem("usersList"))||[],"user");
+                await uploadCol("empProfiles",JSON.parse(localStorage.getItem("empProfileList"))||[],"scanId");
+                fbStatus("Firebase: Local data uploaded ✓",true);
+            }catch(e){console.error(e);fbStatus("Upload failed: "+e.message);alert("Upload failed.");}
+        }
+        async function readCol(name){
+            const s=await getDocs(collection(fbDb,name));return s.docs.map(d=>d.data());
+        }
+        async function firebaseDownloadAll(){
+            if(!isTechStaff()) { alert('Only Main Admin / Developer / Programmer can download cloud data.'); return; }
+            if(!fbDb){alert("আগে Connect Firebase করুন।");return;}
+            try{
+                const [a,b,u,ep]=await Promise.all([readCol("attendance"),readCol("tradeBills"),readCol("users"),readCol("empProfiles")]);
+                const merge=(local,cloud,key)=>{
+                    const map=new Map();
+                    [...(local||[]),...(cloud||[])].forEach(x=>{ if(x && x[key]!==undefined) map.set(String(x[key]),x); });
+                    return Array.from(map.values());
+                };
+                const localA=JSON.parse(localStorage.getItem("attList")||"[]");
+                const localB=JSON.parse(localStorage.getItem("billList")||"[]");
+                const localEP=JSON.parse(localStorage.getItem("empProfileList")||"[]");
+                const mergedA=merge(localA,a,"regNo");
+                const mergedB=merge(localB,b,"regNo");
+                const mergedEP=merge(localEP,ep,"scanId");
+                localStorage.setItem("attList",JSON.stringify(mergedA));
+                localStorage.setItem("billList",JSON.stringify(mergedB));
+                localStorage.setItem("empProfileList",JSON.stringify(mergedEP));
+                const localU=JSON.parse(localStorage.getItem("usersList")||"[]");
+                const mergedU=merge(localU,u,"user");
+                localStorage.setItem("usersList",JSON.stringify(mergedU.length ? mergedU : ensureAdminAndRoles()));
+                ensureAdminAndRoles();
+                if(typeof loadAttendance==="function")loadAttendance();
+                if(typeof loadBills==="function")loadBills();
+                if(typeof renderAttendanceSummaries==="function")renderAttendanceSummaries();
+                if(typeof renderBillSummaries==="function")renderBillSummaries();
+                if(typeof renderUserList==="function")renderUserList();
+                if(typeof renderEmpProfileTable==="function")renderEmpProfileTable();
+                fbStatus("Firebase: Cloud data downloaded ✓",true);
+            }catch(e){console.error(e);fbStatus("Download failed: "+e.message);}
+        }
+        let cloudApplying = false;
+        const cloudSyncTimers = {};
+        const CLOUD_COLLECTIONS = {attList:'attendance', billList:'tradeBills', usersList:'users', empProfileList:'empProfiles'};
+        const CLOUD_KEYS = {attList:'regNo', billList:'regNo', usersList:'user', empProfileList:'scanId'};
+
+        async function cloudReplaceCollection(localKey){
+            if(!fbDb || cloudApplying) return;
+            const col=CLOUD_COLLECTIONS[localKey], key=CLOUD_KEYS[localKey];
+            if(!col || !key) return;
+            try {
+                const rows=JSON.parse(localStorage.getItem(localKey)||'[]');
+                const snap=await getDocs(collection(fbDb,col));
+                const current=new Map(rows.filter(x=>x&&x[key]!==undefined).map(x=>[String(x[key]),x]));
+                const writes=[];
+                for(const x of rows){
+                    if(!x || x[key]===undefined) continue;
+                    const id=String(x[key]).replaceAll('/','_');
+                    writes.push(setDoc(doc(fbDb,col,id),{...x,_syncUpdatedAt:new Date().toISOString()}));
+                }
+                for(const d of snap.docs){ if(!current.has(String(d.data()?.[key] ?? d.id))) writes.push(deleteDoc(d.ref)); }
+                await Promise.all(writes);
+                fbStatus('Firebase: All data synced ✓',true);
+            } catch(e){ console.error('Cloud sync',localKey,e); fbStatus('Firebase sync failed: '+e.message); }
+        }
+        function scheduleCloudSync(localKey){
+            if(!CLOUD_COLLECTIONS[localKey] || cloudApplying || !fbDb) return;
+            clearTimeout(cloudSyncTimers[localKey]);
+            cloudSyncTimers[localKey]=setTimeout(async()=>{
+                try{
+                    const col=CLOUD_COLLECTIONS[localKey], key=CLOUD_KEYS[localKey];
+                    const rows=JSON.parse(localStorage.getItem(localKey)||'[]');
+                    const stamp=new Date().toISOString();
+                    await Promise.all(rows.filter(x=>x&&x[key]!==undefined).map(x=>{
+                        const item={...x,_syncUpdatedAt:x._syncUpdatedAt||stamp};
+                        return setDoc(doc(fbDb,col,String(x[key]).replaceAll('/','_')),item);
+                    }));
+                    fbStatus('Firebase: Realtime Cloud Sync ✓',true);
+                }catch(e){console.error('Realtime cloud sync',e);fbStatus('Firebase sync failed: '+e.message);}
+            },350);
+        }
+
+        async function firebaseStartRealtimeSync(){
+            if(!fbDb) return;
+            fbUnsubs.forEach(u=>{try{u()}catch(e){}}); fbUnsubs=[];
+            const subscribe=(localKey)=>{
+                const col=CLOUD_COLLECTIONS[localKey], key=CLOUD_KEYS[localKey];
+                const unsub=onSnapshot(collection(fbDb,col), snap=>{
+                    cloudApplying=true;
+                    try {
+                        const cloud=snap.docs.map(d=>d.data()).filter(x=>x&&x[key]!==undefined);
+                        const local=JSON.parse(localStorage.getItem(localKey)||'[]');
+                        const map=new Map();
+                        [...local,...cloud].forEach(x=>{ if(x&&x[key]!==undefined){
+                            const id=String(x[key]); const old=map.get(id);
+                            const ot=old?Date.parse(old._syncUpdatedAt||old.updatedAt||0):0;
+                            const nt=Date.parse(x._syncUpdatedAt||x.updatedAt||0);
+                            if(!old || nt>=ot) map.set(id,x);
+                        }});
+                        localStorage.setItem(localKey,JSON.stringify([...map.values()]));
+                    } finally { cloudApplying=false; }
+                    if(localKey==='attList'){if(typeof loadAttendance==='function')loadAttendance();if(typeof renderAttendanceSummaries==='function')renderAttendanceSummaries();}
+                    if(localKey==='billList'){if(typeof loadBills==='function')loadBills();if(typeof renderBillSummaries==='function')renderBillSummaries();}
+                    if(localKey==='usersList'){if(typeof ensureAdminAndRoles==='function')ensureAdminAndRoles();if(typeof renderUserList==='function')renderUserList();}
+                    if(localKey==='empProfileList' && typeof renderEmpProfileTable==='function')renderEmpProfileTable();
+                },e=>fbStatus('Realtime sync failed: '+e.message));
+                fbUnsubs.push(unsub);
+            };
+            Object.keys(CLOUD_COLLECTIONS).forEach(subscribe);
+            fbStatus('Firebase: Realtime Cloud Sync ✓',true);
+        }
+
+        // Watch application data writes so changes made in any browser are propagated to Firestore.
+        if(!window.__akashCloudStorageHooked){
+            window.__akashCloudStorageHooked=true;
+            const _set=Storage.prototype.setItem;
+            Storage.prototype.setItem=function(k,v){
+                _set.call(this,k,v);
+                if(this===localStorage && !cloudApplying && CLOUD_COLLECTIONS[k] && typeof scheduleCloudSync==='function') scheduleCloudSync(k);
+            };
+            const _remove=Storage.prototype.removeItem;
+            Storage.prototype.removeItem=function(k){
+                _remove.call(this,k);
+                if(this===localStorage && !cloudApplying && CLOUD_COLLECTIONS[k] && typeof scheduleCloudSync==='function') scheduleCloudSync(k);
+            };
+        }
+
+        async function fbUploadAttachment(regNo,file){
+            if(!fbStorage) throw Error('Firebase Storage is not available');
+            const safe=String(regNo).replace(/[^a-zA-Z0-9_-]/g,'_');
+            const fileRef=storageRef(fbStorage,`attendance-attachments/${safe}/${Date.now()}_${file.name}`);
+            const snap=await uploadBytes(fileRef,file);
+            return await getDownloadURL(snap.ref);
+        }
+        async function fbUploadFutureFile(id,file){
+            if(!fbStorage) throw Error('Firebase Storage is not available');
+            const safe=String(id).replace(/[^a-zA-Z0-9_-]/g,'_');
+            const fileRef=storageRef(fbStorage,`future-files/${safe}_${file.name}`);
+            const snap=await uploadBytes(fileRef,file);
+            return await getDownloadURL(snap.ref);
+        }
+        window.__fbUploadAttachment=fbUploadAttachment;
+        window.__fbUploadFutureFile=fbUploadFutureFile;
+        window.connectFirebase=connectFirebase;window.firebaseUploadAll=firebaseUploadAll;
+        window.firebaseDownloadAll=firebaseDownloadAll;window.firebaseStartRealtimeSync=firebaseStartRealtimeSync;
+        window.addEventListener("DOMContentLoaded",async()=>{
+            const saved = JSON.parse(localStorage.getItem(FB_KEY)||"null");
+            const c = saved || BUILT_IN_FIREBASE_CONFIG;
+            fillCfg(c);
+            if(await initFB(c)){
+                await firebaseDownloadAll().catch(()=>{});
+                await firebaseStartRealtimeSync();
+            }
+        });
+    </script>
+    <script>
+        // --- Role Based Authentication ---
+        const ADMIN_USER = 'akashtrade';
+        const ADMIN_PASS = 'akashtrade94';
+
+        const BUILT_IN_ROLES = [
+            { user:'developer', pass:'dev2026', role:'developer' },
+            { user:'programmer', pass:'prog2026', role:'programmer' }
+        ];
+
+        function roleLabel(role) {
+            return ({
+                'main-admin':'Main Admin',
+                'admin':'Main Admin',
+                'developer':'Developer',
+                'programmer':'Programmer',
+                'user':'User'
+            })[role] || 'User';
+        }
+
+        function ensureAdminAndRoles() {
+            let users = JSON.parse(localStorage.getItem('usersList') || '[]');
+            if(!Array.isArray(users)) users=[];
+
+            let admin = users.find(u => u.user === ADMIN_USER);
+            if(!admin) {
+                admin = {user:ADMIN_USER, pass:ADMIN_PASS, role:'main-admin'};
+                users.push(admin);
+            } else {
+                admin.pass = ADMIN_PASS;
+                admin.role = 'main-admin';
+            }
+
+            BUILT_IN_ROLES.forEach(seed => {
+                if(!users.some(u => u.user === seed.user)) users.push({...seed});
+            });
+
+            users.forEach(u => {
+                if(!u.role) u.role='user';
+                if(u.user === ADMIN_USER) u.role='main-admin';
+            });
+
+            localStorage.setItem('usersList', JSON.stringify(users));
+            return users;
+        }
+
+        function currentUser() {
+            const u = localStorage.getItem('loggedInUser');
+            if(!u) return null;
+            const users = ensureAdminAndRoles();
+            return users.find(x=>x.user===u) || null;
+        }
+
+        function isAdmin() {
+            const u=currentUser();
+            return !!u && (u.role==='main-admin' || u.role==='admin' || u.user===ADMIN_USER);
+        }
+
+        function isTechStaff() {
+            const u=currentUser();
+            return !!u && (isAdmin() || u.role==='developer' || u.role==='programmer');
+        }
+
+        function requireAdmin() {
+            if(!isAdmin()) { alert('এই কাজটি শুধু Main Admin করতে পারবেন।'); return false; }
+            return true;
+        }
+
+        function requireTechStaff() {
+            if(!isTechStaff()) { alert('এই কাজটি শুধু Main Admin / Developer / Programmer করতে পারবেন।'); return false; }
+            return true;
+        }
+
+        function applyRoleUI() {
+            const admin = isAdmin();
+            const tech = isTechStaff();
+            document.querySelectorAll('.admin-only').forEach(el=>{
+                el.style.display = admin ? (el.classList.contains('tab-btn') ? 'inline-block' : '') : 'none';
+            });
+            const syncBtn = document.getElementById('syncTabBtn');
+            if(syncBtn) syncBtn.style.display = tech ? 'inline-block' : 'none';
+            const user = currentUser();
+            const label = document.getElementById('currentLoggedInUser');
+            if(label) label.innerText = user ? `${user.user} (${roleLabel(user.role)})` : '';
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const users = ensureAdminAndRoles();
+            const valid = users.find(item => item.user === u && item.pass === p);
+            if(valid) {
+                localStorage.setItem('loggedInUser', u);
+                document.getElementById('loginOverlay').style.display = 'none';
+                applyRoleUI();
+                initApp();
+                setTimeout(async()=>{ try{ if(isTechStaff() && fbDb){ await firebaseDownloadAll(); await firebaseUploadAll(); } }catch(e){ console.warn('Automatic cloud restore skipped:',e); } },700);
+            } else {
+                alert('Invalid User ID or Password.');
+            }
+        }
+
+        function logoutSystem() {
+            localStorage.removeItem('loggedInUser');
+            location.reload();
+        }
+
+        window.onload = function() {
+            ensureAdminAndRoles();
+            const loggedIn = localStorage.getItem('loggedInUser');
+            if(loggedIn && currentUser()) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                applyRoleUI();
+                initApp();
+                setTimeout(async()=>{
+                    try{ if(isTechStaff() && fbDb){ await firebaseDownloadAll(); await firebaseUploadAll(); } }catch(e){ console.warn('Automatic cloud restore skipped:',e); }
+                },700);
+            }
+        }
+
+        let clickCount = 0;
+        function secretSettingsTrigger() {
+            if(!requireAdmin()) return;
+            clickCount++;
+            if(clickCount >= 3) {
+                clickCount = 0;
+                switchTab('settingsTab', document.createElement('button'));
+            }
+        }
+
+        function migrateEditLockFields() {
+            ['attList','billList'].forEach(key=>{
+                let list=JSON.parse(localStorage.getItem(key)||'[]');
+                let changed=false;
+                list.forEach(item=>{
+                    if(typeof item.editCount !== 'number'){ item.editCount=0; changed=true; }
+                    if(typeof item.permanentLocked !== 'boolean'){ item.permanentLocked=item.editCount>=2; changed=true; }
+                    if(key==='attList' && item.attachment===undefined){ item.attachment=null; changed=true; }
+                    if(key==='attList' && item.outTime){ const newOt=calculateOvertime(item.outTime); if(item.ot!==newOt){ item.ot=newOt; changed=true; } }
+                });
+                if(changed) localStorage.setItem(key,JSON.stringify(list));
+            });
+        }
+
+        function restorePreviousDataCompatibility(){
+            const aliases={
+                attList:['attendanceList','attendanceData','attendanceRecords','akash_attList'],
+                billList:['tradeBillList','tradeBills','billData','akash_billList'],
+                empProfileList:['employeeProfiles','employeeProfileList','employeesList','akash_empProfileList'],
+                usersList:['users','userList']
+            };
+            Object.entries(aliases).forEach(([target,keys])=>{
+                const cur=JSON.parse(localStorage.getItem(target)||'[]');
+                if(Array.isArray(cur) && cur.length) return;
+                for(const k of keys){
+                    try{const v=JSON.parse(localStorage.getItem(k)||'[]'); if(Array.isArray(v)&&v.length){localStorage.setItem(target,JSON.stringify(v));break;}}catch(e){}
+                }
+            });
+        }
+
+
+        // v14: restore legacy Trade Registered records from the 2026-08-24 backup.
+        // Existing browser data is preserved; legacy records are merged by Reg No.
+        const LEGACY_TRADE_REGISTERED_V14 = [{"billFrom": "282", "regNo": "BILL-2001", "billTotal": "1148614.99", "billRemarks": "0", "monthYear": "January-2026", "billTo": "1", "approved": true, "totalBill": "282", "billVat": "238613.20", "billDespatch": "0", "_syncUpdatedAt": "2026-08-23T04:21:21.077Z", "shipper": "JINNAT FASHIONS LTD"}, {"billRemarks": "0", "_syncUpdatedAt": "2026-08-23T04:21:23.325Z", "totalBill": "5138", "shipper": "FLAMINGO FASHIONS LTD", "approved": true, "billVat": "2126206.56", "monthYear": "January-2026", "billDespatch": "0", "billTotal": "10710053.63", "billTo": "1", "regNo": "BILL-2002", "billFrom": "5139"}, {"monthYear": "February-2026", "approved": true, "billTotal": "1241541.00", "_syncUpdatedAt": "2026-08-23T08:09:49.904Z", "billRemarks": "0", "billTo": "283", "shipper": "JINNAT FASHIONS LTD", "billFrom": "572", "totalBill": "290", "billVat": "257617.04", "regNo": "BILL-2003", "billDespatch": "0"}, {"monthYear": "February-2026", "billTo": "5140", "billTotal": "11161197.13", "billVat": "2182010.40", "shipper": "FLAMINGO FASHIONS LTD", "billFrom": "10556", "billRemarks": "0", "billDespatch": "0", "regNo": "BILL-2004", "totalBill": "5416", "approved": true, "_syncUpdatedAt": "2026-08-23T08:09:51.320Z"}, {"billRemarks": "0", "_syncUpdatedAt": "2026-08-23T08:09:52.696Z", "totalBill": "01", "shipper": "CONTAINER - JFL", "approved": true, "billVat": "0", "monthYear": "February-2026", "billTotal": "252733.53", "billDespatch": "0", "billTo": "01", "regNo": "BILL-2005", "billFrom": "01"}, {"shipper": "JINNAT FASHIONS LTD", "billVat": "127258.23", "billRemarks": "0", "approved": true, "totalBill": "156", "billTo": "573", "billFrom": "728", "regNo": "BILL-2006", "_syncUpdatedAt": "2026-08-23T08:11:14.752Z", "billDespatch": "0", "monthYear": "March-2026", "billTotal": "816018.51"}, {"billDespatch": "0", "approved": true, "totalBill": "4872", "_syncUpdatedAt": "2026-08-23T08:11:16.104Z", "billRemarks": "0", "billTotal": "10029853.64", "billTo": "10557", "monthYear": "March-2026", "regNo": "BILL-2007", "shipper": "FLAMINGO FASHIONS LTD", "billFrom": "15428", "billVat": "1932799.48"}, {"monthYear": "April-2026", "billTo": "729", "billVat": "194107.78", "billTotal": "1336304.23", "shipper": "JINNAT FASHIONS LTD", "billFrom": "972", "billDespatch": "0", "regNo": "BILL-2008", "billRemarks": "0", "totalBill": "227", "approved": true, "_syncUpdatedAt": "2026-08-23T08:13:03.816Z"}, {"billTo": "15429", "billDespatch": "0", "billVat": "2071460.37", "totalBill": "4925", "shipper": "FLAMINGO FASHIONS LTD", "billRemarks": "0", "regNo": "BILL-2009", "approved": true, "_syncUpdatedAt": "2026-08-23T08:13:05.392Z", "billTotal": "10420493.80", "monthYear": "April-2026", "billFrom": "20353"}, {"billTotal": "130036.95", "monthYear": "April-2026", "billRemarks": "0", "approved": true, "regNo": "BILL-2010", "totalBill": "17", "billDespatch": "0", "shipper": "CONTAINER-JFL", "billFrom": "01", "_syncUpdatedAt": "2026-08-23T08:13:07.336Z", "billVat": "17560.14", "billTo": "01"}, {"regNo": "BILL-2011", "billVat": "128416.97", "billFrom": "1124", "billTo": "973", "shipper": "JINNAT FASHIONS", "billRemarks": "0", "monthYear": "May-2026", "billTotal": "736241.44", "_syncUpdatedAt": "2026-08-23T08:14:24.344Z", "billDespatch": "0", "approved": true, "totalBill": "152"}, {"billTo": "20354", "approved": true, "billTotal": "10881093.47", "billDespatch": "0", "regNo": "BILL-2012", "monthYear": "May-2026", "billVat": "2210454.12", "shipper": "FLAMINGO FASHIONS LTD", "totalBill": "5078", "billRemarks": "0", "_syncUpdatedAt": "2026-08-23T08:14:25.616Z", "billFrom": "25431"}];
+        function mergeLegacyTradeRegisteredV14(){
+            try{
+                const current = JSON.parse(localStorage.getItem('billList') || '[]');
+                const merged = Array.isArray(current) ? current.slice() : [];
+                const seen = new Set(merged.map(x => String(x && x.regNo || '').trim().toLowerCase()).filter(Boolean));
+                LEGACY_TRADE_REGISTERED_V14.forEach(src => {
+                    const key = String(src && src.regNo || '').trim().toLowerCase();
+                    if(!key || seen.has(key)) return;
+                    const r = Object.assign({}, src);
+                    if(!r.date) r.date = '';
+                    if(r.editCount == null) r.editCount = 0;
+                    if(r.permanentLocked == null) r.permanentLocked = false;
+                    merged.push(r); seen.add(key);
+                });
+                localStorage.setItem('billList', JSON.stringify(merged));
+            }catch(e){ console.warn('Legacy Trade Registered merge skipped', e); }
+        }
+
+        function initApp() {
+            restorePreviousDataCompatibility();
+            mergeLegacyTradeRegisteredV14();
+            ensureAdminAndRoles();
+            applyRoleUI();
+            migrateEditLockFields();
+            migrateEmployeeProfileLockFields();
+            generateNextScanId();
+            renderEmpProfileTable();
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            let optionsHTML = '';
+            for(let y = 2026; y <= 2050; y++) {
+                months.forEach(m => { optionsHTML += `<option value="${m}-${y}">${m}-${y}</option>`; });
+            }
+            document.getElementById('attMonthYear').innerHTML = optionsHTML;
+            document.getElementById('billMonthYear').innerHTML = optionsHTML;
+            const billDateEl = document.getElementById('billDate');
+            if (billDateEl && !billDateEl.value) billDateEl.value = new Date().toISOString().slice(0,10);
+            document.getElementById('backupFolderSelect').innerHTML = optionsHTML;
+
+            refreshSavedNameValidation();
+            loadAttendance();
+            loadBills();
+            renderAttendanceSummaries();
+            renderBillSummaries();
+            renderUserList();
+            loadFutureFiles();
+            updateAttendanceOTPreview();
+
+            let nowStr = new Date().toLocaleDateString('en-GB') + ', ' + new Date().toLocaleTimeString();
+            document.getElementById('attGenTime').innerText = nowStr;
+            document.getElementById('billGenDate').innerText = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+            
+            generateReportQRCodes();
+        }
+
+        function generateReportQRCodes(){
+            try{
+                if(typeof QRious !== 'function') return;
+                const a=document.getElementById('attQRCode');
+                const b=document.getElementById('billHeaderQRCode');
+                if(a) new QRious({element:a,value:'AKASH_TRADE_ATTENDANCE_VERIFIED_2026',size:60,level:'H'});
+                if(b) new QRious({element:b,value:'AKASH_TRADE_BILL_CONFIRMED_2026',size:45,level:'H'});
+            }catch(e){ console.warn('QR generation failed',e); }
+        }
+
+        function switchTab(tabId, btn) {
+            if(tabId==='dataFolderTab') { if(!requireTechStaff()) return; }
+            if(tabId==='settingsTab') { if(!requireAdmin()) return; }
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(btn && btn.classList) btn.classList.add('active');
+            if(tabId === 'attSummaryTab') renderAttendanceSummaries();
+            if(tabId === 'billSummaryTab') renderBillSummaries();
+            if(tabId === 'settingsTab') renderUserList();
+            if(tabId === 'futureUploadTab') loadFutureFiles();
+        }
+
+        // --- ID Card Profile, Approval, 3-Edit Limit & Punch Scan ---
+        function generateNextScanId() {
+            let profiles = JSON.parse(localStorage.getItem('empProfileList') || '[]');
+            let maxNum = 0;
+            profiles.forEach(p => {
+                const m = String(p.scanId || '').match(/PERM-\d{4}-(\d+)/i);
+                if(m) maxNum = Math.max(maxNum, Number(m[1]));
+            });
+            const scanId = `PERM-2026-${String(maxNum + 1).padStart(3, '0')}`;
+            const scanInput = document.getElementById('empProfileScanId');
+            if(scanInput) scanInput.value = scanId;
+        }
+
+        function migrateEmployeeProfileLockFields() {
+            let profiles = JSON.parse(localStorage.getItem('empProfileList') || '[]');
+            if(!Array.isArray(profiles)) profiles=[];
+            let changed=false;
+            profiles.forEach(p=>{
+                if(typeof p.editCount !== 'number'){p.editCount=0;changed=true;}
+                if(typeof p.approved !== 'boolean'){p.approved=false;changed=true;}
+                if(typeof p.permanentLocked !== 'boolean'){p.permanentLocked=p.editCount>=3 || p.approved;changed=true;}
+                if(p.bloodGroup===undefined){p.bloodGroup='';changed=true;}
+                if(!p.employmentStatus){p.employmentStatus='active';changed=true;}
+                if(p.endDate===undefined){p.endDate='';changed=true;}
+            });
+            if(changed) localStorage.setItem('empProfileList',JSON.stringify(profiles));
+        }
+
+        async function saveEmployeeProfile() {
+            if(!requireAdmin()) return;
+            let name=document.getElementById('empProfileName').value.trim();
+            let designation=document.getElementById('empProfileDesignation').value.trim();
+            let mobile=document.getElementById('empProfileMobile').value.trim();
+            let licence=document.getElementById('empProfileLicence').value.trim();
+            let nid=document.getElementById('empProfileNid').value.trim();
+            let bloodGroup=document.getElementById('empProfileBloodGroup').value.trim();
+            let employmentStatus=document.getElementById('empProfileEmploymentStatus')?.value || 'active';
+            let endDate=document.getElementById('empProfileEndDate')?.value || '';
+            let scanId=document.getElementById('empProfileScanId').value.trim();
+            let photoInput=document.getElementById('empProfilePhoto');
+            let photoFile=photoInput?.files?.[0];
+
+            if(!name || !mobile){alert('Please enter Employee Name and Mobile No.');return;}
+            if(photoFile){
+                if(photoFile.size>5*1024*1024){alert('File size exceeds maximum limit of 5 MB.');return;}
+                if(!['image/jpeg','image/png'].includes(photoFile.type)){alert('Invalid file format. Only JPG/PNG allowed.');return;}
+            }
+
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let photoData="https://via.placeholder.com/150";
+            if(photoFile){
+                photoData=await new Promise(resolve=>{
+                    const reader=new FileReader();
+                    reader.onload=e=>resolve(e.target.result);
+                    reader.readAsDataURL(photoFile);
+                });
+            }
+
+            profiles.push({
+                scanId,name,designation,mobile,licence,nid,bloodGroup,photo:photoData,
+                editCount:0,approved:false,permanentLocked:false,employmentStatus, endDate, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+            });
+            localStorage.setItem('empProfileList',JSON.stringify(profiles));
+
+            alert(`Permanent ID Card Profile Created Successfully with Number: ${scanId}`);
+            ['empProfileName','empProfileDesignation','empProfileMobile','empProfileLicence','empProfileNid'].forEach(id=>document.getElementById(id).value='');
+            document.getElementById('empProfileBloodGroup').value='';
+            if(document.getElementById('empProfileEmploymentStatus')) document.getElementById('empProfileEmploymentStatus').value='active';
+            if(document.getElementById('empProfileEndDate')) document.getElementById('empProfileEndDate').value='';
+            if(photoInput) photoInput.value='';
+            generateNextScanId(); refreshSavedNameValidation(); renderEmpProfileTable();
+        }
+
+        function getEmployeeCardStatus(p){
+            const status=String(p?.employmentStatus||'active').toLowerCase();
+            const endDate=String(p?.endDate||'');
+            if(status==='banned') return {active:false,label:'🚫 BANNED',cls:'profile-locked'};
+            if(status==='ended') return {active:false,label:'⛔ ENDED',cls:'profile-locked'};
+            if(endDate){
+                const today=new Date().toISOString().slice(0,10);
+                if(endDate<=today) return {active:false,label:'⛔ EXPIRED',cls:'profile-locked'};
+            }
+            return {active:true,label:'🟢 ACTIVE',cls:'profile-approved'};
+        }
+
+        function setEmployeeCardStatus(index,status){
+            if(!requireAdmin()) return;
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index]; if(!p) return;
+            if(status==='active'){ p.employmentStatus='active'; p.endDate=''; }
+            else if(status==='ended'){ p.employmentStatus='ended'; p.endDate=new Date().toISOString().slice(0,10); }
+            else if(status==='banned'){ p.employmentStatus='banned'; p.endDate=new Date().toISOString().slice(0,10); }
+            p.updatedAt=new Date().toISOString(); profiles[index]=p;
+            localStorage.setItem('empProfileList',JSON.stringify(profiles));
+            renderEmpProfileTable();
+            alert(status==='active' ? `ID Card ${p.scanId} re-activated. Scan is enabled.` : `ID Card ${p.scanId} is ${status.toUpperCase()}. Scan and attendance punch are disabled.`);
+        }
+
+        function getEmployeeByScanCode(scanCode){
+            const profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            const code=String(scanCode||'').trim().toLowerCase();
+            return profiles.find(p=>String(p.scanId||'').toLowerCase()===code || String(p.mobile||'')===String(scanCode||'').trim()) || null;
+        }
+
+        function renderEmpProfileTable() {
+            migrateEmployeeProfileLockFields();
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let tbody=document.getElementById('empProfileTableBody');
+            if(!tbody)return;
+            tbody.innerHTML='';
+            if(!profiles.length){
+                tbody.innerHTML='<tr><td colspan="7" style="color:#777;padding:15px;">No employee ID profile created yet.</td></tr>';
+                return;
+            }
+            profiles.forEach((p,index)=>{
+                const count=Number(p.editCount||0);
+                const locked=!!p.permanentLocked || count>=3;
+                const approved=!!p.approved;
+                if(count>=3 && !p.permanentLocked){p.permanentLocked=true;}
+                const cardState=getEmployeeCardStatus(p);
+                const status=cardState.active
+                    ? (approved ? '<span class="profile-status-badge profile-approved">✓ ACTIVE • Approved/Locked</span>' : '<span class="profile-status-badge profile-pending">🟢 ACTIVE • Pending</span>')
+                    : `<span class="profile-status-badge ${cardState.cls}">${cardState.label}</span>`;
+                const editBtn=(!isAdmin()||approved||locked)
+                    ? '<button class="btn btn-secondary" disabled style="padding:3px 8px;font-size:10px;opacity:.55;">🔒 Edit</button>'
+                    : `<button class="btn btn-warning" onclick="openEmployeeProfileEdit(${index})" style="padding:3px 8px;font-size:10px;">✏️ Edit <span class="profile-edit-count">${count}/3</span></button>`;
+                const approveBtn=(!isAdmin()||approved||locked)
+                    ? '<button class="btn btn-secondary" disabled style="padding:3px 8px;font-size:10px;opacity:.55;">Approved</button>'
+                    : `<button class="btn btn-primary" onclick="approveEmployeeProfile(${index})" style="padding:3px 8px;font-size:10px;">✓ Approve</button>`;
+                const deleteBtn=(!isAdmin()||approved||locked)
+                    ? '<button class="btn btn-secondary" disabled style="padding:3px 8px;font-size:10px;opacity:.55;">Delete Locked</button>'
+                    : `<button class="btn btn-danger" onclick="deleteEmpProfile(${index})" style="padding:3px 8px;font-size:10px;">Delete</button>`;
+                const statusBtn=(!isAdmin()) ? '' : (cardState.active
+                    ? `<button class="btn btn-danger" onclick="setEmployeeCardStatus(${index},'ended')" style="padding:3px 8px;font-size:10px;">⛔ End Job</button><button class="btn btn-warning" onclick="setEmployeeCardStatus(${index},'banned')" style="padding:3px 8px;font-size:10px;">🚫 Ban</button>`
+                    : `<button class="btn btn-success" onclick="setEmployeeCardStatus(${index},'active')" style="padding:3px 8px;font-size:10px;">🟢 Activate</button>`);
+                tbody.innerHTML += `<tr>
+                    <td><b>${escapeHtml(p.scanId)}</b></td>
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${escapeHtml(p.designation||'Staff')}</td>
+                    <td><b>${escapeHtml(p.bloodGroup||'N/A')}</b></td>
+                    <td>${escapeHtml(p.mobile)}</td>
+                    <td>${status}<br><span style="font-size:10px;color:#64748b;">Edits: ${count}/3</span></td>
+                    <td>
+                        <button class="btn btn-primary" style="padding:3px 8px;font-size:10px;" onclick="printBiometricIdCard(${index})">🖨 Print</button>
+                        ${editBtn}${approveBtn}${deleteBtn}${statusBtn}
+                    </td>
+                </tr>`;
+            });
+            localStorage.setItem('empProfileList',JSON.stringify(profiles));
+        }
+
+        function openEmployeeProfileEdit(index){
+            if(!requireAdmin())return;
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index];
+            if(!p)return;
+            let count=Number(p.editCount||0);
+            if(p.approved||p.permanentLocked||count>=3){
+                alert(p.approved?'Approved card cannot be changed.':'This card has reached 3 edits and is permanently locked.');
+                return;
+            }
+            window.currentEmployeeProfileEditIndex=index;
+            document.getElementById('employeeProfileEditInfo').innerHTML=`Permanent No: <b>${escapeHtml(p.scanId)}</b> — Edit ${count+1}/3`;
+            const fields=[
+                ['name','Full Name','text'],['designation','Designation','text'],['mobile','Mobile No','text'],
+                ['licence','Licence No','text'],['nid','NID No','text'],['bloodGroup','Blood Group','text']
+            ];
+            document.getElementById('employeeProfileEditFields').innerHTML=fields.map(([k,label,type])=>{
+                if(k==='bloodGroup'){
+                    return `<div><label>${label}</label><select id="empEdit_${k}">
+                        ${['','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(v=>`<option value="${v}" ${v===String(p[k]||'')?'selected':''}>${v||'Select Blood Group'}</option>`).join('')}
+                    </select></div>`;
+                }
+                return `<div><label>${label}</label><input id="empEdit_${k}" type="${type}" value="${escapeHtml(p[k]||'')}"></div>`;
+            }).join('');
+            document.getElementById('employeeProfileEditModal').style.display='flex';
+        }
+
+        function closeEmployeeProfileEdit(){
+            document.getElementById('employeeProfileEditModal').style.display='none';
+            document.getElementById('employeeProfileEditFields').innerHTML='';
+            window.currentEmployeeProfileEditIndex=null;
+        }
+
+        async function saveEmployeeProfileEdit(){
+            if(!requireAdmin())return;
+            const index=window.currentEmployeeProfileEditIndex;
+            if(index===null||index===undefined)return;
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index];
+            if(!p)return closeEmployeeProfileEdit();
+            const count=Number(p.editCount||0);
+            if(p.approved||p.permanentLocked||count>=3){
+                closeEmployeeProfileEdit();
+                alert('This employee card is locked and cannot be changed.');
+                return;
+            }
+            ['name','designation','mobile','licence','nid','bloodGroup'].forEach(k=>{
+                const el=document.getElementById('empEdit_'+k);
+                if(el)p[k]=el.value.trim();
+            });
+            if(!p.name||!p.mobile){alert('Name and Mobile No. are required.');return;}
+            p.editCount=count+1;
+            if(p.editCount>=3)p.permanentLocked=true;
+            p.lastEditedAt=new Date().toISOString();
+            profiles[index]=p;
+            localStorage.setItem('empProfileList',JSON.stringify(profiles));
+            closeEmployeeProfileEdit();
+            renderEmpProfileTable(); refreshSavedNameValidation();
+            alert(p.permanentLocked
+                ? 'Edit saved. This was Edit 3/3, so the card is now permanently locked.'
+                : `Edit saved successfully. Remaining edits: ${3-p.editCount}.`);
+        }
+
+        function approveEmployeeProfile(index){
+            if(!requireAdmin())return;
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index];
+            if(!p)return;
+            if(p.permanentLocked && !p.approved){ alert('This card is already permanently locked.'); return; }
+            if(confirm(`Approve Permanent No ${p.scanId}?\\nApproved হলে এই ID card-এর কোনো তথ্য আর Edit/Delete করা যাবে না.`)){
+                p.approved=true;
+                p.permanentLocked=true;
+                p.approvedAt=new Date().toISOString();
+                profiles[index]=p;
+                localStorage.setItem('empProfileList',JSON.stringify(profiles));
+                renderEmpProfileTable();
+                alert('Employee ID Card Approved. Changes are now permanently locked.');
+                }
+        }
+
+        function canvasToDataUrlSafe(canvas){
+            try { return canvas && canvas.toDataURL ? canvas.toDataURL("image/png") : ""; } catch(e){ return ""; }
+        }
+
+        function printBiometricIdCard(index){
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index];
+            if(!p)return;
+            const employment=getEmployeeCardStatus(p);
+            const status=employment.label + (p.approved?' • Approved/Locked':'');
+            const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v;};
+            set('printCardName',p.name||'N/A'); set('printCardDesig',p.designation||'STAFF');
+            set('printCardIdFront',p.scanId||'N/A'); set('printCardIdFrontVertical',p.scanId||'N/A'); set('printCardIdBack',p.scanId||'N/A');
+            set('printCardMobile',p.mobile||'N/A'); set('printCardLicence',p.licence||'N/A'); set('printCardNid',p.nid||'N/A'); set('printCardBlood',p.bloodGroup||'N/A');
+            const photo=document.getElementById('printCardPhoto'); if(photo)photo.src=p.photo||'https://via.placeholder.com/150';
+            set('printBackName',p.name||'N/A'); set('printBackDesig',p.designation||'STAFF'); set('printBackMobile',p.mobile||'N/A');
+            set('printBackLicence',p.licence||'N/A'); set('printBackNid',p.nid||'N/A'); set('printBackBlood',p.bloodGroup||'N/A'); set('printBackStatus',status); set('printBackPunchId',p.scanId||'N/A');
+            const qrText=`AKASH TRADE INTERNATIONAL | PERMANENT NO: ${p.scanId||''} | NAME: ${p.name||''} | MOBILE: ${p.mobile||''} | BLOOD: ${p.bloodGroup||'N/A'} | NID: ${p.nid||'N/A'} | ATTENDANCE PUNCH`;
+            if(typeof QRious!=='undefined'){
+                new QRious({element:document.getElementById('printCardQrCanvas'),value:qrText,size:120,level:'H',foreground:'#123b56',background:'#dff3ff'});
+                new QRious({element:document.getElementById('printCardQrBackCanvas'),value:qrText,size:100,level:'H',foreground:'#123b56',background:'#dff3ff'});
+            }
+            const container=document.getElementById('printableIdCardContainer');
+            if(!container){alert('ID Card print area not found.');return;}
+            const css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n');
+            const w=window.open('','_blank','width=1200,height=900');
+            if(!w){alert('Popup blocked. Please allow popups for this site.');return;}
+            w.document.open();
+            const printClone=container.cloneNode(true);
+            const q1=canvasToDataUrlSafe(document.getElementById('printCardQrCanvas'));
+            const q2=canvasToDataUrlSafe(document.getElementById('printCardQrBackCanvas'));
+            [printClone.querySelector('#printCardQrCanvas'),printClone.querySelector('#printCardQrBackCanvas')].forEach((c,i)=>{
+                const src=i===0?q1:q2;
+                if(c && src){ const img=document.createElement('img'); img.src=src; img.className=c.className; img.width=c.width; img.height=c.height; img.style.cssText=c.getAttribute('style')||''; c.replaceWith(img); }
+            });
+            w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Employee Identity Card</title><style>${css}
+@page{size:A4 landscape;margin:.25in}html,body{margin:0!important;padding:0!important;background:#fff!important}
+#printableIdCardContainer{display:flex!important;visibility:visible!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;justify-content:center!important;align-items:flex-start!important;gap:.28in!important;padding:.15in!important;box-sizing:border-box!important}
+#printableIdCardContainer *{visibility:visible!important}.id-card-side{break-inside:avoid!important;box-shadow:none!important}.no-print{display:none!important}
+</style></head><body>${printClone.outerHTML}<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},500);};<\/script></body></html>`);
+            w.document.close();
+        }
+        function deleteEmpProfile(index){
+            if(!requireAdmin())return;
+            let profiles=JSON.parse(localStorage.getItem('empProfileList')||'[]');
+            let p=profiles[index];
+            if(!p)return;
+            if(p.approved||p.permanentLocked){
+                alert('Approved/Permanently locked employee cards cannot be deleted.');
+                return;
+            }
+            if(confirm('Are you sure you want to delete this Employee ID profile?')){
+                profiles.splice(index,1);
+                localStorage.setItem('empProfileList',JSON.stringify(profiles));
+                renderEmpProfileTable(); refreshSavedNameValidation(); generateNextScanId();
+            }
+        }
+
+        function testHardwareConnection() {
+            let type = document.getElementById('hardwareScannerType').value;
+            alert(`Testing hardware connection for [${type.toUpperCase()}]...\n🟢 Device Connected Successfully and Listening for Scan Input!`);
+        }
+
+        function handleQuickScanKeydown(event) {
+            if(event.key === 'Enter') {
+                triggerQuickScanPunch();
+            }
+        }
+
+        function triggerQuickScanPunch() {
+            let scanCode = document.getElementById('quickScanInput').value.trim();
+            if(!scanCode) return;
+            
+            let profiles = JSON.parse(localStorage.getItem('empProfileList') || '[]');
+            let matchedEmp = profiles.find(p => p.scanId.toLowerCase() === scanCode.toLowerCase() || p.mobile === scanCode);
+            if(matchedEmp){
+                const state=getEmployeeCardStatus(matchedEmp);
+                if(!state.active){
+                    document.getElementById('quickScanInput').value='';
+                    alert(`🚫 ID CARD DISABLED\n${matchedEmp.name} (${matchedEmp.scanId}) — ${state.label.replace(/^[^A-Z]+/,'')}\nThis ID card can no longer scan or punch attendance.`);
+                    return;
+                }
+            }
+
+            let empIdToUse = matchedEmp ? `${matchedEmp.name} (${matchedEmp.scanId})` : scanCode;
+
+            document.getElementById('attEmpId').value = empIdToUse;
+            document.getElementById('attDate').value = new Date().toISOString().slice(0, 10);
+            
+            let nowTime = new Date().toTimeString().slice(0, 5);
+            document.getElementById('attIn').value = nowTime;
+            document.getElementById('attStatus').value = 'Present';
+
+            saveAttendance();
+            document.getElementById('quickScanInput').value = '';
+            alert(`Auto Scan Matched! Attendance Punch recorded for: ${empIdNameDisplay(empIdToUse)} at ${nowTime}`);
+        }
+
+        function empIdNameDisplay(str) { return str; }
+
+        // --- Admin User Management & Delete Option ---
+        function openAdminUserControl() {
+            if(!requireAdmin()) return;
+            switchTab('settingsTab', document.createElement('button'));
+        }
+
+        function saveNewUserCredentialsSecure() {
+            if(!requireAdmin()) return;
+            const adminPass = document.getElementById('adminVerifyPass').value.trim();
+            if(adminPass !== ADMIN_PASS) { alert('Invalid Admin Password.'); return; }
+            const u = document.getElementById('newUserIdInput').value.trim();
+            const p = document.getElementById('newUserPassInput').value.trim();
+            const role = document.getElementById('newUserRoleInput').value;
+            if(!u || !p) { alert('Please enter both User ID and Password'); return; }
+            if(u === ADMIN_USER) { alert('Main Admin account cannot be modified here.'); return; }
+
+            let users = ensureAdminAndRoles();
+            let existing = users.find(item => item.user === u);
+            if(existing) {
+                existing.pass = p;
+                existing.role = role;
+                alert(`${roleLabel(role)} account updated successfully: ${u}`);
+            } else {
+                users.push({user:u, pass:p, role:role});
+                alert(`${roleLabel(role)} account created successfully: ${u}`);
+            }
+            localStorage.setItem('usersList', JSON.stringify(users));
+            document.getElementById('adminVerifyPass').value = '';
+            document.getElementById('newUserIdInput').value = '';
+            document.getElementById('newUserPassInput').value = '';
+            renderUserList();
+        }
+
+        function renderUserList() {
+            let users = ensureAdminAndRoles();
+            const tbody = document.getElementById('userListTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            users.forEach(item => {
+                const isMain = item.user === ADMIN_USER;
+                const deleteBtn = isMain ? '<span style="font-size:11px;color:#94a3b8;">Protected</span>' : `<button class="btn btn-danger" onclick="deleteUserAccount('${escapeHtml(item.user)}')" style="padding:2px 8px;font-size:11px;">Delete</button>`;
+                tbody.innerHTML += `<tr><td><b>${escapeHtml(item.user)}</b></td><td>${escapeHtml(roleLabel(item.role))}</td><td class="no-print">${deleteBtn}</td></tr>`;
+            });
+        }
+
+        function deleteUserAccount(userId) {
+            if(!requireAdmin()) return;
+            if(userId === ADMIN_USER) { alert('System main admin account cannot be deleted!'); return; }
+            if(confirm(`Are you sure you want to delete user [${userId}]?`)) {
+                let users = ensureAdminAndRoles();
+                users = users.filter(u => u.user !== userId);
+                localStorage.setItem('usersList', JSON.stringify(users));
+                renderUserList();
+                alert(`User [${userId}] removed successfully.`);
+            }
+        }
+
+        function unlockSyncCenter() {
+            if(!requireTechStaff()) return;
+            let pass = document.getElementById('syncSecurityPass').value.trim();
+            if(pass === ADMIN_PASS) {
+                document.getElementById('restoreAuthBox').style.display = 'none';
+                document.getElementById('syncContentPanel').style.display = 'block';
+                document.getElementById('syncSecurityPass').value='';
+                alert('Sync Center Unlocked Successfully!');
+            } else {
+                alert('Incorrect Admin Password.');
+            }
+        }
+
+        function normalizeSavedValue(v) { return String(v || '').trim().replace(/\s+/g, ' '); }
+        function uniqueSorted(values) {
+            const map = new Map();
+            (values || []).forEach(v => {
+                const x = normalizeSavedValue(v);
+                if (x) map.set(x.toLowerCase(), x);
+            });
+            return Array.from(map.values()).sort((a,b)=>a.localeCompare(b, undefined, {sensitivity:'base'}));
+        }
+        function refreshSavedNameValidation() {
+            const att = JSON.parse(localStorage.getItem('attList') || '[]');
+            const bills = JSON.parse(localStorage.getItem('billList') || '[]');
+            const profiles = JSON.parse(localStorage.getItem('empProfileList') || '[]');
+            
+            let allEmpIds = att.map(x => x.empId).concat(profiles.map(p => `${p.name} (${p.scanId})`));
+            const employeeIds = uniqueSorted(allEmpIds);
+            const shippers = uniqueSorted(bills.map(x => x.shipper));
+            
+            const empList = document.getElementById('employeeIdOptions');
+            const shipList = document.getElementById('shipperNameOptions');
+            if (empList) empList.innerHTML = employeeIds.map(x => `<option value="${escapeHtml(x)}"></option>`).join('');
+            if (shipList) shipList.innerHTML = shippers.map(x => `<option value="${escapeHtml(x)}"></option>`).join('');
+        }
+
+        function saveAttendance() { processAttendanceData('Saved'); }
+        function addAttendance() { processAttendanceData('Added'); }
+        function addNewAttendanceData() {
+            document.querySelectorAll('#attFormGrid input').forEach(input => input.value = '');
+            alert('Form cleared for New Attendance Data entry.');
+        }
+        function openAttendancePrintWindow(){
+            generateReportQRCodes();
+            prepareAttReportView();
+            const src=document.getElementById('printableAttReport');
+            if(!src){alert('Attendance report not found.');return;}
+            const w=window.open('','_blank','width=1200,height=850');
+            if(!w){alert('Popup blocked. Please allow popups for this site.');return;}
+            const css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n');
+            const clone=src.cloneNode(true);
+            const qr=clone.querySelector('#attQRCode');
+            const qrSrc=canvasToDataUrlSafe(document.getElementById('attQRCode'));
+            if(qr && qrSrc){ const img=document.createElement('img'); img.src=qrSrc; img.width=60; img.height=60; img.style.cssText='width:60px;height:60px;display:block;'; qr.replaceWith(img); }
+            w.document.open();
+            w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Attendance Report</title><style>${css}
+@page{size:A4 landscape;margin:.25in}html,body{margin:0!important;padding:0!important;background:#fff!important}
+#printableAttReport{display:block!important;visibility:visible!important;position:relative!important;width:100%!important;margin:0!important;background:#fff!important;border:1px solid #333!important;padding:16px!important;box-sizing:border-box!important}
+#printableAttReport *{visibility:visible!important}.att-report-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}.att-report-table th,.att-report-table td{font-size:10px!important;padding:4px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;text-align:center!important;vertical-align:middle!important}.no-print{display:none!important}.report-signature-row{page-break-inside:avoid!important}
+</style></head><body>${clone.outerHTML}<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},450);};<\/script></body></html>`);
+            w.document.close();
+        }
+        function printAttReport(){ openAttendancePrintWindow(); }
+        function downloadAttPDF(){ openAttendancePrintWindow(); }
+
+        function parseTimeMinutes(t) {
+            if(!t) return null;
+            const [h,m]=String(t).split(':').map(Number);
+            if(Number.isNaN(h)||Number.isNaN(m)) return null;
+            return h*60+m;
+        }
+        function formatTime12(t) {
+            if(!t) return '';
+            const mins=parseTimeMinutes(t);
+            if(mins===null) return t;
+            let h=Math.floor(mins/60), m=mins%60;
+            const ap=h>=12?'PM':'AM';
+            h=h%12; if(h===0) h=12;
+            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ap}`;
+        }
+        function calculateOvertime(outTime) {
+            const out=parseTimeMinutes(outTime);
+            const cutoff=20*60;
+            if(out===null || out<=cutoff) return '00:00';
+            const mins=out-cutoff;
+            return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+        }
+        function updateAttendanceOTPreview() {
+            const out=document.getElementById('attOut')?.value || '';
+            const ot=document.getElementById('attOT');
+            if(ot) ot.value=calculateOvertime(out);
+        }
+
+        function processAttendanceData(actionType) {
+            let monthYear = document.getElementById('attMonthYear').value;
+            let empId = document.getElementById('attEmpId').value;
+            let date = document.getElementById('attDate').value;
+            let punchId = document.getElementById('attPunchId').value;
+            let inTime = document.getElementById('attIn').value;
+            let breakTime = document.getElementById('attBreak').value;
+            let outTime = document.getElementById('attOut').value;
+            let ot = calculateOvertime(outTime);
+            let status = document.getElementById('attStatus').value;
+            let note = document.getElementById('attNote').value;
+
+            if(!empId || !date) { alert('Please fill Employee ID and Date'); return; }
+
+            const scanMatch=(String(empId).match(/\((PERM-[^)]+)\)/i)||[])[1] || String(empId).trim();
+            const employee=getEmployeeByScanCode(scanMatch);
+            if(employee){
+                const state=getEmployeeCardStatus(employee);
+                if(!state.active){ alert(`🚫 Attendance blocked. ${employee.name} (${employee.scanId}) — ${state.label}.`); return; }
+            }
+
+            let list = JSON.parse(localStorage.getItem('attList')) || [];
+            let regNo = "ATT-REG-" + (1000 + list.length + 1);
+            const record = { regNo, monthYear, empId, date, punchId, inTime, breakTime, outTime, ot, status, note, approved: false, editCount: 0, permanentLocked: false, attachment: null };
+            list.push(record);
+            localStorage.setItem('attList', JSON.stringify(list));
+            refreshSavedNameValidation();
+            loadAttendance();
+            renderAttendanceSummaries();
+            if(actionType === 'Saved') alert(`Attendance Data Saved Successfully! OT: ${formatOT(ot)}`);
+        }
+        function formatOT(v) {
+            if(!v) return '00:00';
+            const [h,m]=String(v).split(':').map(Number);
+            return `${Number(h)||0}h ${String(Number(m)||0).padStart(2,'0')}m`;
+        }
+
+        function loadAttendance() {
+            let list = JSON.parse(localStorage.getItem('attList')) || [];
+            let tbody = document.getElementById('attTableBody');
+            tbody.innerHTML = '';
+            const q = (document.getElementById('attRegSearch')?.value || '').trim().toLowerCase();
+            let rows = list.map((item,index)=>({item,index}));
+            if(q) rows = rows.filter(x => String(x.item.regNo||'').toLowerCase().includes(q));
+
+            rows.forEach(({item,index}) => {
+                const editCount = Number(item.editCount || 0);
+                const locked = !!item.permanentLocked || editCount >= 2;
+                if(editCount >= 2 && !item.permanentLocked) item.permanentLocked = true;
+
+                let badge = locked ? '<span class="lock-badge">🔒 Permanent Locked</span>' :
+                    (item.approved ? '<span class="approved-badge">Approved</span>' : '<span class="pending-badge">Pending</span>');
+                let fileBadge = item.attachment
+                    ? `<button class="file-badge" onclick="openAttachmentByIndex(${index})" style="border:0;cursor:pointer;">📎 ${escapeHtml(item.attachment.name || 'File')}</button>`
+                    : '<span style="font-size:10px;color:#64748b;">No file</span>';
+
+                const editBtn = !isAdmin() ? '' : (locked
+                    ? '<button class="btn btn-secondary" disabled style="padding:2px 6px;font-size:10px;opacity:.55;">🔒 Edit Locked</button>'
+                    : `<button class="btn btn-warning" onclick="openDirectEdit('attendance',${index})" style="padding:2px 6px;font-size:10px;">✏️ Edit <span class="edit-count-badge">${editCount}/2</span></button>`);
+
+                tbody.innerHTML += `<tr>
+                    <td><b>${escapeHtml(item.regNo)}</b></td><td>${escapeHtml(item.monthYear)}</td><td>${escapeHtml(item.date)}</td>
+                    <td>${escapeHtml(item.empId)}</td><td>${escapeHtml(item.punchId)}</td><td>${escapeHtml(formatTime12(item.inTime))}</td>
+                    <td>${escapeHtml(formatTime12(item.breakTime))}</td><td>${escapeHtml(formatTime12(item.outTime))}</td><td>${escapeHtml(formatOT(item.ot || '00:00'))}</td>
+                    <td>${escapeHtml(item.status)}</td><td>${badge}</td>
+                    <td class="no-print">
+                        ${fileBadge}<br>
+                        <button class="btn btn-primary" onclick="chooseAttendanceFile(${index})" style="padding:2px 6px;font-size:10px;margin-top:3px;">📎 Upload File</button>
+                        <input type="file" id="attFile_${index}" style="display:none" onchange="uploadAttendanceFile(${index},this.files[0])">
+                    </td>
+                    <td class="no-print">
+                        ${editBtn}
+                        <button class="btn btn-secondary" onclick="printSingleRecord('attendance',${index})" style="padding:2px 6px;font-size:10px;">🖨 Print</button>
+                        ${isAdmin() && !item.approved && !locked ? `<button class="btn btn-primary" onclick="approveAtt(${index})" style="padding:2px 6px;font-size:10px;">Approve</button>` : ''}
+                        ${isAdmin() && !item.approved && !locked ? `<button class="btn btn-danger" onclick="deleteAtt(${index})" style="padding:2px 6px;font-size:10px;">Delete</button>` : ''}
+                    </td>
+                </tr>`;
+            });
+            if(q && rows.length===0) tbody.innerHTML='<tr><td colspan="13" style="padding:20px;color:#888;">No Attendance Reg No found.</td></tr>';
+            localStorage.setItem('attList', JSON.stringify(list));
+            prepareAttReportView();
+        }
+
+        function prepareAttReportView() {
+            let list = JSON.parse(localStorage.getItem('attList')) || [];
+            let reportRows = document.getElementById('attReportRows');
+            reportRows.innerHTML = '';
+            let selectedMonthYear = document.getElementById('attMonthYear').value;
+            let filteredList = list.filter(item => item.monthYear === selectedMonthYear);
+            if(filteredList.length === 0) reportRows.innerHTML = `<tr><td colspan="10" style="text-align:center; color:#888;">No Attendance Data Found for ${selectedMonthYear}</td></tr>`;
+            filteredList.forEach(item => {
+                reportRows.innerHTML += `<tr><td>${item.date}</td><td>${escapeHtml(item.empId)}</td><td>${item.punchId || 0}</td><td>${formatTime12(item.inTime)}</td><td>${formatTime12(item.breakTime)}</td><td>${formatTime12(item.outTime)}</td><td>${formatOT(item.ot || '00:00')}</td><td>${escapeHtml(item.status)}</td><td>${escapeHtml(item.note || '')}</td></tr>`;
+            });
+            document.getElementById('printableAttReport').style.display = 'block';
+        }
+
+        function approveAtt(index) {
+            if(!requireAdmin()) return;
+            let list = JSON.parse(localStorage.getItem('attList'));
+            list[index].approved = true;
+            list[index].approvedAt = new Date().toISOString();
+            localStorage.setItem('attList', JSON.stringify(list));
+            loadAttendance();
+            renderAttendanceSummaries();
+            alert('Attendance Approved.');
+        }
+
+        let currentEdit = null;
+        function escapeHtml(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+        function clearRegSearch(type) {
+            const id = type === 'att' ? 'attRegSearch' : 'billRegSearch';
+            const el = document.getElementById(id);
+            if(el) el.value = '';
+            type === 'att' ? loadAttendance() : loadBills();
+        }
+
+        function openDirectEdit(type, index) {
+            if(!requireAdmin()) return;
+            let key = type === 'attendance' ? 'attList' : 'billList';
+            let list = JSON.parse(localStorage.getItem(key)) || [];
+            let item = list[index];
+            if(!item) return;
+            if(type==='attendance' && item.outTime) item.ot=calculateOvertime(item.outTime);
+            let count = Number(item.editCount || 0);
+            if(item.permanentLocked || count >= 2) { alert('এই data ২ বার Edit হয়ে গেছে। এটি Permanent Locked.'); return; }
+            currentEdit = {type,index,oldRegNo:String(item.regNo)};
+            const fields = type === 'attendance'
+                ? [['regNo','Reg No','text'],['monthYear','Month & Year','text'],['empId','Employee ID','text'],['date','Date','date'],['punchId','Punch ID','text'],['inTime','IN Time','time'],['breakTime','Break Time','time'],['outTime','OUT Time','time'],['ot','Overtime (Hours)','text'],['status','Status','text'],['note','Note','text']]
+                : [['regNo','Reg No','text'],['monthYear','Month & Year','text'],['shipper','Shipper Name','text'],['billTo','Bill To','text'],['billFrom','Bill From','text'],['totalBill','Total Bill','text'],['billVat','Tax / VAT','number'],['billTotal','Total Taka','number'],['billDespatch','Despatch','text'],['billRemarks','Remarks','text']];
+            document.getElementById('editModalInfo').innerHTML = `Reg No: <b>${escapeHtml(item.regNo)}</b> — Edit ${count+1}/2.`;
+            const box = document.getElementById('editFields');
+            box.innerHTML = fields.map(([k,label,inputType]) => `<div><label>${escapeHtml(label)}</label><input id="editField_${k}" type="${inputType}" value="${escapeHtml(item[k] ?? '')}" ${k==='ot'?'readonly style="background:#f1f5f9;"':''}></div>`).join('');
+            document.getElementById('directEditModal').style.display='flex';
+        }
+
+        function closeDirectEdit() {
+            document.getElementById('directEditModal').style.display='none';
+            document.getElementById('editFields').innerHTML='';
+            currentEdit=null;
+        }
+
+        function saveDirectEdit() {
+            if(!currentEdit) return;
+            const {type,index}=currentEdit;
+            const key = type === 'attendance' ? 'attList' : 'billList';
+            let list = JSON.parse(localStorage.getItem(key)) || [];
+            let item = list[index];
+            if(!item) return closeDirectEdit();
+
+            const fields = type === 'attendance'
+                ? ['regNo','monthYear','empId','date','punchId','inTime','breakTime','outTime','ot','status','note']
+                : ['regNo','monthYear','shipper','billTo','billFrom','totalBill','billVat','billTotal','billDespatch','billRemarks'];
+
+            fields.forEach(k => {
+                const el=document.getElementById('editField_'+k);
+                if(el) item[k]=el.value.trim();
+            });
+            if(type==='attendance') item.ot = calculateOvertime(item.outTime);
+            item.editCount = Number(item.editCount || 0) + 1;
+            item.permanentLocked = item.editCount >= 2;
+
+            list[index]=item;
+            localStorage.setItem(key,JSON.stringify(list));
+            closeDirectEdit();
+            type==='attendance' ? (loadAttendance(),renderAttendanceSummaries()) : (loadBills(),renderBillSummaries());
+            alert('Edit successful and saved!');
+        }
+
+        function printSingleRecord(type,index) {
+            const list = JSON.parse(localStorage.getItem(type==='attendance'?'attList':'billList')) || [];
+            const item=list[index];
+            if(!item) return;
+            const w=window.open('','_blank','width=900,height=700');
+            if(!w){ alert('Popup blocked.'); return; }
+            const title=type==='attendance'?'Attendance Record':'Trade Registered Bill Record';
+            const rows=Object.entries(item).filter(([k])=>!['_syncUpdatedAt'].includes(k)).map(([k,v])=>`<tr><th style="text-align:left;padding:8px;border:1px solid #ccc;">${escapeHtml(k)}</th><td style="padding:8px;border:1px solid #ccc;">${escapeHtml(v)}</td></tr>`).join('');
+            w.document.write(`<html><head><title>${title}</title><style>body{font-family:Arial;padding:25px}table{border-collapse:collapse;width:100%}h2{text-align:center}</style></head><body><h2>AKASH TRADE INTERNATIONAL</h2><h3 style="text-align:center">${title}</h3><table>${rows}</table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.close();
+        }
+
+        function chooseAttendanceFile(index) {
+            const input=document.getElementById('attFile_'+index);
+            if(input) input.click();
+        }
+
+        async function uploadAttendanceFile(index,file) {
+            if(!file) return;
+            if(file.size > 5 * 1024 * 1024) { alert('File size exceeds maximum limit of 5 MB.'); return; }
+            let list=JSON.parse(localStorage.getItem('attList')) || [];
+            const item=list[index];
+            if(!item) return;
+
+            try {
+                item.attachment={name:file.name,type:file.type,size:file.size,uploadedAt:new Date().toISOString()};
+                list[index]=item;
+                localStorage.setItem('attList',JSON.stringify(list));
+                loadAttendance();
+                alert(`File Uploaded & Saved Successfully!\nFile "${file.name}" attached to ${item.regNo}.`);
+            } catch(e) { alert('File attach failed: '+e.message); }
+        }
+
+        function openAttachmentByIndex(index) {
+            let list=JSON.parse(localStorage.getItem('attList')) || [];
+            const item=list[index];
+            if(item && item.attachment) alert(`Attachment Info:\nFile Name: ${item.attachment.name}\nSize: ${(item.attachment.size/1024).toFixed(1)} KB`);
+        }
+
+        function deleteAtt(index) {
+            if(!requireAdmin()) return;
+            let list = JSON.parse(localStorage.getItem('attList'));
+            if(list[index].approved) { alert('Approved records cannot be deleted!'); return; }
+            if(confirm('Delete this record?')) { list.splice(index,1); localStorage.setItem('attList',JSON.stringify(list)); loadAttendance(); renderAttendanceSummaries(); }
+        }
+
+        function renderAttendanceSummaries() {
+            let list = JSON.parse(localStorage.getItem('attList')) || [];
+            document.getElementById('attAzTotalCount').innerText = list.length;
+            document.getElementById('attAzPresentCount').innerText = list.filter(i => i.status === 'Present').length;
+            document.getElementById('attAzAbsentCount').innerText = list.filter(i => i.status === 'Absent').length;
+            document.getElementById('attAzLateCount').innerText = list.filter(i => i.status === 'Late').length;
+
+            let monthlyBody = document.getElementById('attMonthlySummaryBody');
+            monthlyBody.innerHTML = '';
+            const monthsNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            let folders = [];
+            for(let y = 2026; y <= 2050; y++) { monthsNames.forEach(m => folders.push(`${m}-${y}`)); }
+
+            folders.forEach(folder => {
+                let fItems = list.filter(i => i.monthYear === folder);
+                if(fItems.length > 0) {
+                    monthlyBody.innerHTML += `<tr><td><b>📁 ${folder}</b></td><td>${fItems.length} records</td><td>${fItems.filter(i => i.status === 'Present').length}</td><td>${fItems.filter(i => i.status === 'Absent').length}</td><td>${fItems.filter(i => i.status === 'Late').length}</td></tr>`;
+                }
+            });
+            if(monthlyBody.innerHTML === '') monthlyBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">No attendance backup data available across folders yet.</td></tr>`;
+        }
+
+        function printAttendanceSummary() {
+            renderAttendanceSummaries();
+            const body=document.getElementById('attMonthlySummaryBody').innerHTML;
+            printHtmlWindow('Attendance Summary', '<h3>Monthly Summary</h3><table><thead><tr><th>Month Folder</th><th>Records</th><th>Present</th><th>Absent</th><th>Late</th></tr></thead><tbody>'+body+'</tbody></table>');
+        }
+
+        function printBillSummary() {
+            renderBillSummaries();
+            const body=document.getElementById('billMonthlySummaryBody').innerHTML;
+            printHtmlWindow('Trade Bill Summary', '<h3>Monthly Summary</h3><table><thead><tr><th>Month Folder</th><th>Records</th><th>Total Bill</th><th>VAT</th><th>Total Taka</th></tr></thead><tbody>'+body+'</tbody></table>');
+        }
+
+        function printHtmlWindow(title,html) {
+            const w=window.open('','_blank','width=1000,height=800');
+            if(!w){alert('Popup blocked.');return;}
+            w.document.write(`<html><head><title>${escapeHtml(title)}</title><style>body{font-family:Arial;padding:25px}h2{text-align:center}table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid #333;padding:7px;text-align:center}th{background:#f1f5f9}</style></head><body><h2>AKASH TRADE INTERNATIONAL</h2><h3 style="text-align:center">${escapeHtml(title)}</h3>${html}<script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.close();
+        }
+
+        // --- Bill Script Functions ---
+        function saveBill() { processBillData('Saved'); }
+        function addBill() { processBillData('Added'); }
+        function addNewBillData() {
+            document.querySelectorAll('#billFormGrid input').forEach(input => input.value = '');
+            const billDateEl = document.getElementById('billDate');
+            if (billDateEl) billDateEl.value = new Date().toISOString().slice(0,10);
+            alert('Form cleared for New Bill Data entry.');
+        }
+        function openBillPrintWindow(asPdf=false) {
+            generateReportQRCodes();
+            prepareBillReportView();
+            const src=document.getElementById('printableBillReport');
+            if(!src){alert('Trade Registered report not found.');return;}
+            const w=window.open('','_blank','width=1200,height=850');
+            if(!w){alert('Popup blocked. Please allow popups for this site.');return;}
+            const css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n');
+            const clone=src.cloneNode(true);
+            const qr=clone.querySelector('#billHeaderQRCode');
+            const qrSrc=canvasToDataUrlSafe(document.getElementById('billHeaderQRCode'));
+            if(qr && qrSrc){ const img=document.createElement('img'); img.src=qrSrc; img.width=45; img.height=45; img.style.cssText='width:45px;height:45px;display:block;'; qr.replaceWith(img); }
+            w.document.open();
+            w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Trade Registered Report</title><style>${css}
+@page{size:A4 landscape;margin:.25in}html,body{margin:0!important;padding:0!important;background:#fff!important}
+#printableBillReport{display:block!important;visibility:visible!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;margin:0!important;background:#fff!important;border:2px solid #000!important;padding:8px!important;box-sizing:border-box!important}
+#printableBillReport *{visibility:visible!important}.bill-report-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}
+.bill-report-table th,.bill-report-table td{font-size:10px!important;padding:4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;vertical-align:middle!important}
+.bill-report-table th:nth-child(1),.bill-report-table td:nth-child(1){width:4%!important;padding-left:3px!important;padding-right:3px!important}
+.bill-report-table th:nth-child(2),.bill-report-table td:nth-child(2){width:20%!important;text-align:center!important}
+.no-print{display:none!important}.report-signature-row{page-break-inside:avoid!important}
+</style></head><body>${clone.outerHTML}<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},450);};<\/script></body></html>`);
+            w.document.close();
+        }
+        function printBillReport() { openBillPrintWindow(false); }
+        function downloadBillPDF() { openBillPrintWindow(true); }
+
+        function processBillData(actionType) {
+            let monthYear = document.getElementById('billMonthYear').value;
+            let billDate = document.getElementById('billDate').value || new Date().toISOString().slice(0,10);
+            let shipper = document.getElementById('billShipper').value;
+            let billTo = document.getElementById('billTo').value;
+            let billFrom = document.getElementById('billFrom').value;
+            let totalBill = document.getElementById('totalBill').value;
+            let billVat = document.getElementById('billVat').value;
+            let billTotal = document.getElementById('billTotal').value;
+            let billDespatch = document.getElementById('billDespatch').value;
+            let billRemarks = document.getElementById('billRemarks').value;
+
+            if(!shipper) { alert('Please enter Shipper Name'); return; }
+
+            let list = JSON.parse(localStorage.getItem('billList')) || [];
+            let regNo = "BILL-" + (2000 + list.length + 1);
+
+            const record = { regNo, monthYear, date: billDate, shipper, billTo, billFrom, totalBill, billVat, billTotal, billDespatch, billRemarks, approved: false, editCount: 0, permanentLocked: false };
+            list.push(record);
+            localStorage.setItem('billList', JSON.stringify(list));
+            refreshSavedNameValidation();
+            document.getElementById('backupFolderSelect').value = monthYear;
+            loadBills();
+            renderBillSummaries();
+            alert(`Bill Data ${actionType} Successfully inside folder [${monthYear}]!`);
+        }
+
+        function loadBills() {
+            let list = JSON.parse(localStorage.getItem('billList')) || [];
+            let selectedFolder = document.getElementById('backupFolderSelect').value;
+            let tbody = document.getElementById('billTableBody');
+            tbody.innerHTML = '';
+            const q = (document.getElementById('billRegSearch')?.value || '').trim().toLowerCase();
+            let rows = list.map((item,index)=>({item,index})).filter(x => q ? true : (!selectedFolder || x.item.monthYear === selectedFolder));
+            if(q) rows = rows.filter(x => String(x.item.regNo||'').toLowerCase().includes(q));
+
+            rows.forEach(({item,index}) => {
+                const editCount = Number(item.editCount || 0);
+                const locked = !!item.permanentLocked || editCount >= 2;
+                if(editCount >= 2 && !item.permanentLocked) item.permanentLocked = true;
+
+                let badge = locked ? '<span class="lock-badge">🔒 Permanent Locked</span>' :
+                    (item.approved ? '<span class="approved-badge">Approved</span>' : '<span class="pending-badge">Pending</span>');
+                const editBtn = !isAdmin() ? '' : (locked
+                    ? '<button class="btn btn-secondary" disabled style="padding:2px 6px;font-size:10px;opacity:.55;">🔒 Edit Locked</button>'
+                    : `<button class="btn btn-warning" onclick="openDirectEdit('bill',${index})" style="padding:2px 6px;font-size:10px;">✏️ Edit <span class="edit-count-badge">${editCount}/2</span></button>`);
+
+                tbody.innerHTML += `<tr>
+                    <td><b>${escapeHtml(item.regNo)}</b></td><td>${escapeHtml(item.monthYear)}</td><td>${escapeHtml(item.date || '')}</td><td>${escapeHtml(item.shipper)}</td>
+                    <td>${escapeHtml(item.billTo)}</td><td>${escapeHtml(item.billFrom)}</td><td>${escapeHtml(item.totalBill)}</td>
+                    <td>${escapeHtml(item.billVat)}</td><td>${escapeHtml(item.billTotal)}</td><td>${escapeHtml(item.billDespatch)}</td>
+                    <td>${escapeHtml(item.billRemarks)}</td><td>${badge}</td>
+                    <td class="no-print">
+                        ${editBtn}
+                        <button class="btn btn-secondary" onclick="printSingleRecord('bill',${index})" style="padding:2px 6px;font-size:10px;">🖨 Print</button>
+                        ${isAdmin() && !item.approved && !locked ? `<button class="btn btn-primary" onclick="approveData(${index})" style="padding:2px 6px;font-size:10px;">Approve</button>` : ''}
+                        ${isAdmin() && !item.approved && !locked ? `<button class="btn btn-danger" onclick="deleteData(${index})" style="padding:2px 6px;font-size:10px;">Delete</button>` : ''}
+                    </td>
+                </tr>`;
+            });
+            if(q && rows.length===0) tbody.innerHTML='<tr><td colspan="13" style="padding:20px;color:#888;">No Trade Bill Reg No found.</td></tr>';
+            localStorage.setItem('billList', JSON.stringify(list));
+            prepareBillReportView();
+        }
+
+        function prepareBillReportView() {
+            let list = JSON.parse(localStorage.getItem('billList')) || [];
+            let selectedFolder = document.getElementById('backupFolderSelect').value;
+            let reportRows = document.getElementById('billReportRows');
+            reportRows.innerHTML = '';
+            let sumBill = 0, sumVat = 0, sumTaka = 0;
+            document.getElementById('billReportMonthTitle').innerText = selectedFolder;
+            const selectedBillDate = (list.find(item => item.monthYear === selectedFolder && item.date) || {}).date || new Date().toISOString().slice(0,10);
+            document.getElementById('billReportDate').innerText = selectedBillDate;
+            let filteredList = list.filter(item => item.monthYear === selectedFolder);
+
+            if(filteredList.length === 0) reportRows.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#888;">No Data Found in Folder ${selectedFolder}</td></tr>`;
+
+            filteredList.forEach((item, idx) => {
+                sumBill += Number(item.totalBill || 0);
+                sumVat += Number(item.billVat || 0);
+                sumTaka += Number(item.billTotal || 0);
+
+                reportRows.innerHTML += `<tr><td>${String(idx + 1).padStart(2, '0')}</td><td style="text-align:left; padding-left:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>${escapeHtml(item.shipper||'')}</b></td><td>${item.billTo || 0}</td><td>${item.billFrom || 0}</td><td>${item.totalBill || 0}</td><td>${item.billVat || 0}</td><td>${item.billTotal || 0}</td><td>${item.billDespatch || 0}</td><td>${item.billRemarks || 0}</td></tr>`;
+            });
+
+            document.getElementById('sumTotalBill').innerText = sumBill.toFixed(2);
+            document.getElementById('sumVat').innerText = sumVat.toFixed(2);
+            document.getElementById('sumTaka').innerText = sumTaka.toFixed(2);
+            document.getElementById('printableBillReport').style.display = 'block';
+        }
+
+        function renderBillSummaries() {
+            let list = JSON.parse(localStorage.getItem('billList')) || [];
+            let azBill = 0, azVat = 0, azTaka = 0;
+            list.forEach(i => { azBill += Number(i.totalBill || 0); azVat += Number(i.billVat || 0); azTaka += Number(i.billTotal || 0); });
+
+            document.getElementById('azTotalCount').innerText = list.length;
+            document.getElementById('azTotalBillSum').innerText = azBill.toFixed(2);
+            document.getElementById('azTotalVatSum').innerText = azVat.toFixed(2);
+            document.getElementById('azGrandTakaSum').innerText = azTaka.toFixed(2);
+
+            let monthlyBody = document.getElementById('billMonthlySummaryBody');
+            monthlyBody.innerHTML = '';
+            const monthsNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            let folders = [];
+            for(let y = 2026; y <= 2050; y++) { monthsNames.forEach(m => folders.push(`${m}-${y}`)); }
+
+            folders.forEach(folder => {
+                let fItems = list.filter(i => i.monthYear === folder);
+                if(fItems.length > 0) {
+                    let fBill = 0, fVat = 0, fTaka = 0;
+                    fItems.forEach(i => { fBill += Number(i.totalBill || 0); fVat += Number(i.billVat || 0); fTaka += Number(i.billTotal || 0); });
+                    monthlyBody.innerHTML += `<tr><td><b>📁 ${folder}</b></td><td>${fItems.length} records</td><td>${fBill.toFixed(2)}</td><td>${fVat.toFixed(2)}</td><td><b>${fTaka.toFixed(2)}</b></td></tr>`;
+                }
+            });
+            if(monthlyBody.innerHTML === '') monthlyBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">No bill backup data available across folders yet.</td></tr>`;
+        }
+
+        // --- Future Upload File Center ---
+        function initFutureFilesDB() {
+            return new Promise((resolve,reject)=>{
+                const req=indexedDB.open('AkashERP_FutureFiles',1);
+                req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains('files')) req.result.createObjectStore('files',{keyPath:'id'}); };
+                req.onsuccess=()=>resolve(req.result);
+                req.onerror=()=>reject(req.error);
+            });
+        }
+        async function saveFutureFileRecord(rec,data) {
+            const db=await initFutureFilesDB();
+            return new Promise((resolve,reject)=>{
+                const tx=db.transaction('files','readwrite');
+                tx.objectStore('files').put({...rec,data});
+                tx.oncomplete=()=>resolve();
+                tx.onerror=()=>reject(tx.error);
+            });
+        }
+        async function getFutureFileRecord(id) {
+            const db=await initFutureFilesDB();
+            return new Promise((resolve,reject)=>{
+                const tx=db.transaction('files','readonly');
+                const req=tx.objectStore('files').get(id);
+                req.onsuccess=()=>resolve(req.result);
+                req.onerror=()=>reject(req.error);
+            });
+        }
+        async function getAllFutureFileRecords() {
+            const db=await initFutureFilesDB();
+            return new Promise((resolve,reject)=>{
+                const tx=db.transaction('files','readonly');
+                const req=tx.objectStore('files').getAll();
+                req.onsuccess=()=>resolve(req.result||[]);
+                req.onerror=()=>reject(req.error);
+            });
+        }
+        async function deleteFutureFileRecord(id) {
+            const db=await initFutureFilesDB();
+            return new Promise((resolve,reject)=>{
+                const tx=db.transaction('files','readwrite');
+                tx.objectStore('files').delete(id);
+                tx.oncomplete=()=>resolve();
+                tx.onerror=()=>reject(tx.error);
+            });
+        }
+        async function uploadFutureFile() {
+            const input=document.getElementById('futureFileInput');
+            const file=input?.files?.[0];
+            if(!file){alert('আগে একটি file select করুন।');return;}
+            if(file.size > 5 * 1024 * 1024) { alert('File size exceeds maximum limit of 5 MB.'); return; }
+            try {
+                const id='FUT-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+                const rec={id,name:file.name,type:file.type||'application/octet-stream',size:file.size,note:document.getElementById('futureFileNote').value.trim(),uploadedAt:new Date().toISOString()};
+                const data=await file.arrayBuffer();
+                await saveFutureFileRecord(rec,data);
+                input.value='';
+                document.getElementById('futureFileNote').value='';
+                await loadFutureFiles();
+                alert(`File Uploaded & Saved Successfully!\n"${file.name}" saved to Future Uploads.`);
+            } catch(e) { alert('File save failed: '+e.message); }
+        }
+        async function loadFutureFiles() {
+            const tbody=document.getElementById('futureFileTableBody');
+            if(!tbody) return;
+            try{
+                const rows=await getAllFutureFileRecords();
+                rows.sort((a,b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
+                tbody.innerHTML='';
+                if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#888;padding:20px;">No future files uploaded yet.</td></tr>';return;}
+                rows.forEach(r=>{
+                    tbody.innerHTML += `<tr><td><b>${escapeHtml(r.name)}</b></td><td>${escapeHtml(r.note||'')}</td><td>${escapeHtml(new Date(r.uploadedAt).toLocaleString())}</td><td>${(Number(r.size||0)/1024).toFixed(1)} KB</td><td class="no-print"><button class="btn btn-primary" onclick="downloadFutureFile('${r.id}')">⬇️ Download</button> <button class="btn btn-secondary" onclick="printFutureFile('${r.id}')">🖨 Print</button> ${isAdmin()?`<button class="btn btn-danger" onclick="removeFutureFile('${r.id}')">Delete</button>`:''}</td></tr>`;
+                });
+            }catch(e){tbody.innerHTML=`<tr><td colspan="5" style="color:#b91c1c;">Could not load files: ${escapeHtml(e.message)}</td></tr>`;}
+        }
+        async function downloadFutureFile(id) {
+            const r=await getFutureFileRecord(id); if(!r) return alert('File not found.');
+            const blob=new Blob([r.data],{type:r.type});
+            const url=URL.createObjectURL(blob); const a=document.createElement('a');a.href=url;a.download=r.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        }
+        async function printFutureFile(id) {
+            const r=await getFutureFileRecord(id); if(!r) return alert('File not found.');
+            const blob=new Blob([r.data],{type:r.type});
+            const url=URL.createObjectURL(blob);
+            const w=window.open(url,'_blank');
+            if(!w){alert('Popup blocked.');return;}
+            setTimeout(()=>{try{w.focus();w.print();}catch(e){}},1200);
+        }
+        async function removeFutureFile(id) {
+            if(!requireAdmin()) return;
+            if(!confirm('এই Future Upload File delete করবেন?')) return;
+            await deleteFutureFileRecord(id); loadFutureFiles();
+        }
+
+        function downloadSystemBackup() {
+            if(!requireAdmin()) return;
+            let masterPackage = {
+                version: "5.2.0",
+                lastUpdated: new Date().toISOString(),
+                attList: JSON.parse(localStorage.getItem('attList')) || [],
+                billList: JSON.parse(localStorage.getItem('billList')) || [],
+                usersList: JSON.parse(localStorage.getItem('usersList')) || [],
+                empProfileList: JSON.parse(localStorage.getItem('empProfileList')) || []
+            };
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterPackage, null, 2));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `AkashTrade_MasterSync_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            alert('Master Package downloaded successfully!');
+        }
+
+        function restoreSystemBackup() {
+            if(!requireAdmin()) return;
+            let fileInput = document.getElementById('restoreFile');
+            if(fileInput.files.length === 0) { alert('Please select a file first.'); return; }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let pkg = JSON.parse(e.target.result);
+                    if(pkg.attList) localStorage.setItem('attList', JSON.stringify(pkg.attList));
+                    if(pkg.billList) localStorage.setItem('billList', JSON.stringify(pkg.billList));
+                    if(pkg.usersList) localStorage.setItem('usersList', JSON.stringify(pkg.usersList));
+                    if(pkg.empProfileList) localStorage.setItem('empProfileList', JSON.stringify(pkg.empProfileList));
+                    initApp();
+                    alert('System Data Restored & Synced Successfully!');
+                } catch(err) { alert('Invalid package file format!'); }
+            };
+            reader.readAsText(file);
+        }
+
+        function applyDirectCodePaste() {
+            if(!requireAdmin()) return;
+            let code = document.getElementById('directCodePasteBox').value.trim();
+            if(!code) { alert('Please paste code first.'); return; }
+            if(confirm('Are you sure you want to apply this new code update?')) {
+                document.open();
+                document.write(code);
+                document.close();
+            }
+        }
+
+        function clearAllSystemData() {
+            if(!requireAdmin()) return;
+            if(confirm('Are you sure you want to reset all data?')) {
+                localStorage.removeItem('attList');
+                localStorage.removeItem('billList');
+                localStorage.removeItem('empProfileList');
+                initApp();
+                alert('System reset completed.');
+            }
+        }
+
+        function approveData(index) {
+            if(!requireAdmin()) return;
+            let list = JSON.parse(localStorage.getItem('billList'));
+            list[index].approved = true;
+            list[index].approvedAt = new Date().toISOString();
+            localStorage.setItem('billList', JSON.stringify(list));
+            loadBills();
+            renderBillSummaries();
+            alert('Record Approved.');
+        }
+
+        function deleteData(index) {
+            if(!requireAdmin()) return;
+            let list = JSON.parse(localStorage.getItem('billList'));
+            if(list[index].approved) { alert('Approved records cannot be deleted!'); return; }
+            if(confirm('Are you sure you want to delete this record?')) {
+                list.splice(index,1);
+                localStorage.setItem('billList',JSON.stringify(list));
+                loadBills();
+                renderBillSummaries();
+            }
+        }
+    </script>
+</body>
+</html>
